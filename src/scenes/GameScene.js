@@ -6,14 +6,14 @@ export default class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
     this.labyrinth = null;
     this.playerPos = { x: 0, y: 0 };
-    this.tileSize = 120;
+    this.tileSize = 100;
   }
 
   create() {
     const { width, height } = this.cameras.main;
 
-    // Generate 3x3 labyrinth
-    this.labyrinth = LabyrinthGenerator.generate(3, 3);
+    // Generate 5x5 labyrinth
+    this.labyrinth = LabyrinthGenerator.generate(5, 5);
 
     // Find start position
     this.playerPos = { ...this.labyrinth.start };
@@ -187,15 +187,40 @@ export default class GameScene extends Phaser.Scene {
           // Mark start/end
           if (x === this.labyrinth.start.x && y === this.labyrinth.start.y) {
             this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, 'START', {
-              fontSize: '14px',
+              fontSize: '12px',
               color: '#4ecca3'
             }).setOrigin(0.5);
           }
           if (x === this.labyrinth.end.x && y === this.labyrinth.end.y) {
             this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, 'END', {
-              fontSize: '14px',
+              fontSize: '12px',
               color: '#ff6b6b'
             }).setOrigin(0.5);
+          }
+
+          // Mark puzzle tiles
+          if (tile.type === 'puzzle') {
+            this.add.circle(
+              posX + this.tileSize / 2,
+              posY + this.tileSize / 2,
+              15,
+              0xffcc00
+            ).setAlpha(0.7);
+            this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, '?', {
+              fontSize: '20px',
+              color: '#ffffff',
+              fontStyle: 'bold'
+            }).setOrigin(0.5);
+          }
+
+          // Mark intersection tiles
+          if (tile.type === 'intersection') {
+            this.add.star(
+              posX + this.tileSize / 2,
+              posY + this.tileSize / 2,
+              4, 10, 20,
+              0xff6b9d
+            );
           }
         }
       });

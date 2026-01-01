@@ -50,6 +50,9 @@ export default class LabyrinthGenerator {
       }
     }
 
+    // Post-process tiles to assign puzzle and intersection types
+    this.postProcessTiles(grid, width, height, start, end);
+
     return {
       width,
       height,
@@ -58,6 +61,72 @@ export default class LabyrinthGenerator {
       end,
       seed: Date.now()
     };
+  }
+
+  /**
+   * Post-process tiles to assign puzzle and intersection types
+   * @param {Array} grid - The generated grid
+   * @param {number} width - Grid width
+   * @param {number} height - Grid height
+   * @param {Object} start - Start position
+   * @param {Object} end - End position
+   */
+  static postProcessTiles(grid, width, height, start, end) {
+    // Collect all path tiles (excluding start and end)
+    const pathTiles = [];
+
+    grid.forEach((row, y) => {
+      row.forEach((tile, x) => {
+        if (tile.type === 'path' &&
+            !(x === start.x && y === start.y) &&
+            !(x === end.x && y === end.y)) {
+          pathTiles.push({ x, y, tile });
+        }
+      });
+    });
+
+    // Shuffle path tiles for random assignment
+    const shuffled = this.shuffleArray(pathTiles);
+
+    // Assign 6 puzzle tiles (or fewer if not enough path tiles)
+    const puzzleCount = Math.min(6, Math.floor(shuffled.length * 0.4));
+    for (let i = 0; i < puzzleCount; i++) {
+      const pos = shuffled[i];
+      grid[pos.y][pos.x].type = 'puzzle';
+      grid[pos.y][pos.x].puzzleId = this.randomPuzzleId();
+    }
+
+    // Assign 2 intersection tiles from remaining tiles
+    const remaining = shuffled.slice(puzzleCount);
+    const intersectionCount = Math.min(2, remaining.length);
+    for (let i = 0; i < intersectionCount; i++) {
+      const pos = remaining[i];
+      grid[pos.y][pos.x].type = 'intersection';
+      grid[pos.y][pos.x].storyBranch = Math.random() > 0.5 ? 'A' : 'B';
+    }
+  }
+
+  /**
+   * Generate a random puzzle ID
+   * @returns {string} Random puzzle ID
+   */
+  static randomPuzzleId() {
+    const riddles = ['riddle_1', 'riddle_2', 'riddle_3', 'riddle_4', 'riddle_5', 'riddle_6'];
+    return riddles[Math.floor(Math.random() * riddles.length)];
+  }
+
+  /**
+   * Shuffle an array using Fisher-Yates algorithm
+   * @param {Array} array - Array to shuffle
+   * @returns {Array} Shuffled copy of array
+   */
+  static shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   }
 
   /**
