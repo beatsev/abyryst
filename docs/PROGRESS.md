@@ -14,6 +14,49 @@ Abyryst is a procedurally generated labyrinth mystery game built as a PWA using 
 
 ## Timeline
 
+### 2026-01-01 - Day 1 Evening: Implementation Planning ✅
+
+**Completed Tasks:**
+1. ✅ Analyzed codebase architecture via Explore agent
+2. ✅ Created comprehensive Day 2-3 implementation plan
+3. ✅ Clarified priorities with user (full game loop + story system)
+4. ✅ Broke down plan into 7 implementation phases
+5. ✅ Updated TODO.md with detailed phase breakdown
+6. ✅ Created CLAUDE.md for future Claude Code instances
+7. ✅ Committed and pushed planning updates to GitHub
+
+**Key Decisions:**
+- **Scope**: Full game loop (5x5 labyrinth + puzzles + story cards)
+- **Tile Distribution**: 6 puzzle tiles, 2 intersections, 15 path tiles in 5x5 grid
+- **Story Flow**: Story cards appear BEFORE puzzles (provides context)
+- **UI Layout**: Top bar overlay (score/timer/hints), non-blocking
+- **Sound System**: Basic Phaser audio (3 sounds: move, solve, error)
+
+**Implementation Phases**:
+1. Grid Expansion (2-3h) - 5x5 labyrinth with tile type indicators
+2. Game State (1-2h) - Score, timer, hints UI overlay
+3. Story System (2-3h) - JSON story cards with dual lineages
+4. Puzzle System (3-4h) - Riddle puzzle with validation and hints
+5. Sound System (1h) - Audio feedback for actions
+6. Integration (30m) - Scene registration and wiring
+7. Polish (2-3h) - Bug fixes and mobile testing
+
+**Estimated Time**: 10-15 hours total
+
+**Files Created**:
+- `/home/sev/.claude/plans/nifty-bubbling-pixel.md` - Full implementation plan
+- `CLAUDE.md` - Codebase guidance for future Claude instances
+
+**Files Modified**:
+- `docs/TODO.md` - Added 7-phase breakdown for Day 2-3
+
+**Next Steps**:
+- [ ] Begin Phase 1: Grid Expansion
+- [ ] Update Generator.js with postProcessTiles()
+- [ ] Change GameScene to 5x5 grid
+
+---
+
 ### 2026-01-01 - Day 1: Project Initialization ✅
 
 **Completed Tasks:**
