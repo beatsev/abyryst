@@ -37,9 +37,9 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       return;
     }
 
-    // Puzzle card background
+    // Puzzle card background (increased height for mobile, reduced margins)
     const cardWidth = Math.min(700, width - 40);
-    const cardHeight = Math.min(500, height - 100);
+    const cardHeight = Math.min(600, height - 60); // Increased from 500 to 600, reduced margin
     this.add.rectangle(width / 2, height / 2, cardWidth, cardHeight, 0x16213e)
       .setStrokeStyle(3, 0x4ecca3);
 
@@ -47,15 +47,15 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const cardTop = height / 2 - cardHeight / 2;
     const cardBottom = height / 2 + cardHeight / 2;
 
-    // Layout spacing constants (increased for better mobile readability)
+    // Layout spacing constants (optimized for mobile readability)
     const spacing = {
-      small: 20,
-      medium: 40,
-      large: 60
+      small: 12,   // Between title and badge
+      medium: 30,  // Between input, hints, feedback
+      large: 45    // Between major sections (question and input)
     };
 
     // Position elements with relative layout from top to bottom
-    let currentY = cardTop + 30;
+    let currentY = cardTop + 20; // Reduced top padding from 30 to 20
 
     // Title
     this.add.text(width / 2, currentY, 'Riddle Puzzle', {
