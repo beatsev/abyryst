@@ -10,11 +10,12 @@ export default class UIOverlay extends Phaser.Scene {
   }
 
   /**
-   * Initialize with game state reference
-   * @param {Object} data - Init data containing gameState
+   * Initialize with game state and sound manager references
+   * @param {Object} data - Init data containing gameState and soundManager
    */
   init(data) {
     this.gameState = data.gameState;
+    this.soundManager = data.soundManager;
   }
 
   create() {
@@ -43,10 +44,32 @@ export default class UIOverlay extends Phaser.Scene {
     }).setOrigin(0.5, 0).setDepth(1001).setScrollFactor(0);
 
     // Hints indicator (right side)
-    this.hintsText = this.add.text(width - 10, 15, '💡×3', {
+    this.hintsText = this.add.text(width - 50, 15, '💡×3', {
       fontSize: '16px',
       color: '#ffcc00'
     }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0);
+
+    // Sound toggle button (far right)
+    this.soundButton = this.add.text(width - 10, 15, '🔊', {
+      fontSize: '18px',
+      color: '#ffffff'
+    }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0)
+      .setInteractive({ useHandCursor: true });
+
+    this.soundButton.on('pointerover', () => {
+      this.soundButton.setScale(1.1);
+    });
+
+    this.soundButton.on('pointerout', () => {
+      this.soundButton.setScale(1.0);
+    });
+
+    this.soundButton.on('pointerdown', () => {
+      if (this.soundManager) {
+        this.soundManager.toggle();
+        this.updateSoundButton();
+      }
+    });
 
     // Update UI every second
     this.time.addEvent({
@@ -58,6 +81,7 @@ export default class UIOverlay extends Phaser.Scene {
 
     // Initial update
     this.updateUI();
+    this.updateSoundButton();
   }
 
   /**
@@ -69,5 +93,15 @@ export default class UIOverlay extends Phaser.Scene {
     this.scoreText.setText(`Score: ${this.gameState.score}`);
     this.timerText.setText(this.gameState.formatTime());
     this.hintsText.setText(`💡×${this.gameState.hintsRemaining}`);
+  }
+
+  /**
+   * Update sound button icon based on enabled state
+   */
+  updateSoundButton() {
+    if (!this.soundManager || !this.soundButton) return;
+
+    const isEnabled = this.soundManager.isEnabled();
+    this.soundButton.setText(isEnabled ? '🔊' : '🔇');
   }
 }

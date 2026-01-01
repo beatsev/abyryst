@@ -23,8 +23,16 @@ export default class GameScene extends Phaser.Scene {
     // Reset game state
     this.gameState.reset();
 
+    // Initialize managers
+    this.storyManager = new StoryManager(this.gameState);
+    this.puzzleManager = new PuzzleManager(this.gameState);
+    this.soundManager = new SoundManager(this);
+
     // Launch UI overlay
-    this.scene.launch('UIOverlay', { gameState: this.gameState });
+    this.scene.launch('UIOverlay', {
+      gameState: this.gameState,
+      soundManager: this.soundManager
+    });
 
     // Generate 5x5 labyrinth
     this.labyrinth = LabyrinthGenerator.generate(5, 5);
@@ -75,11 +83,6 @@ export default class GameScene extends Phaser.Scene {
     this.swipeStartX = 0;
     this.swipeStartY = 0;
     this.swipeMinDistance = 50;
-
-    // Initialize managers
-    this.storyManager = new StoryManager(this.gameState);
-    this.puzzleManager = new PuzzleManager(this.gameState);
-    this.soundManager = new SoundManager(this);
 
     // Show intro story
     const introStory = this.storyManager.getNextStory('start');
