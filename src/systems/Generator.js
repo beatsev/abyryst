@@ -107,11 +107,16 @@ export default class LabyrinthGenerator {
   }
 
   /**
-   * Generate a random puzzle ID
+   * Generate a random puzzle ID from pool of 20 riddles
    * @returns {string} Random puzzle ID
    */
   static randomPuzzleId() {
-    const riddles = ['riddle_1', 'riddle_2', 'riddle_3', 'riddle_4', 'riddle_5', 'riddle_6'];
+    const riddles = [
+      'riddle_1', 'riddle_2', 'riddle_3', 'riddle_4', 'riddle_5',
+      'riddle_6', 'riddle_7', 'riddle_8', 'riddle_9', 'riddle_10',
+      'riddle_11', 'riddle_12', 'riddle_13', 'riddle_14', 'riddle_15',
+      'riddle_16', 'riddle_17', 'riddle_18', 'riddle_19', 'riddle_20'
+    ];
     return riddles[Math.floor(Math.random() * riddles.length)];
   }
 

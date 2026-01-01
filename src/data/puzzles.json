@@ -65,6 +65,160 @@
         "It's a unit of weight"
       ],
       "difficulty": "hard"
+    },
+    {
+      "id": "riddle_7",
+      "question": "What has keys but no locks, space but no room, and you can enter but can't go inside?",
+      "answer": "keyboard",
+      "hints": [
+        "You're probably using one right now",
+        "It helps you type",
+        "Think about computers"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "riddle_8",
+      "question": "I'm tall when I'm young, and I'm short when I'm old. What am I?",
+      "answer": "candle",
+      "hints": [
+        "I provide light",
+        "I get smaller as time passes",
+        "I burn from the top"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "riddle_9",
+      "question": "What has a head and a tail but no body?",
+      "answer": "coin",
+      "hints": [
+        "You use me to buy things",
+        "I'm made of metal",
+        "I have two sides"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "riddle_10",
+      "question": "What gets wetter the more it dries?",
+      "answer": "towel",
+      "hints": [
+        "You use me after a shower",
+        "I absorb water",
+        "I help you get dry"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "riddle_11",
+      "question": "I have branches, but no fruit, trunk, or leaves. What am I?",
+      "answer": "bank",
+      "hints": [
+        "You keep money here",
+        "I have multiple locations",
+        "Think about financial institutions"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "riddle_12",
+      "question": "What can travel around the world while staying in a corner?",
+      "answer": "stamp",
+      "hints": [
+        "You put me on mail",
+        "I'm small and sticky",
+        "I go in the top-right corner"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "riddle_13",
+      "question": "I have a neck but no head, and I wear a cap. What am I?",
+      "answer": "bottle",
+      "hints": [
+        "I hold liquids",
+        "My cap screws on and off",
+        "You drink from me"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "riddle_14",
+      "question": "What has many teeth but cannot bite?",
+      "answer": "comb",
+      "hints": [
+        "You use me for grooming",
+        "I help untangle hair",
+        "My teeth are evenly spaced"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "riddle_15",
+      "question": "I'm light as a feather, yet the strongest person can't hold me for five minutes. What am I?",
+      "answer": "breath",
+      "hints": [
+        "Everyone does this constantly",
+        "You can't see me",
+        "You need me to live"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "riddle_16",
+      "question": "What comes once in a minute, twice in a moment, but never in a thousand years?",
+      "answer": "m",
+      "hints": [
+        "This is about spelling",
+        "Look at the letters in each word",
+        "Count a specific letter"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "riddle_17",
+      "question": "The more of this there is, the less you see. What is it?",
+      "answer": "darkness",
+      "hints": [
+        "It's the opposite of light",
+        "It makes it hard to see",
+        "It happens at night"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "riddle_18",
+      "question": "What belongs to you, but other people use it more than you do?",
+      "answer": "name",
+      "hints": [
+        "You were given this at birth",
+        "People say it to get your attention",
+        "It identifies you"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "riddle_19",
+      "question": "I have no life, but I can die. What am I?",
+      "answer": "battery",
+      "hints": [
+        "I power devices",
+        "I run out of energy",
+        "You need to charge or replace me"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "riddle_20",
+      "question": "What has one eye but cannot see?",
+      "answer": "needle",
+      "hints": [
+        "You use me for sewing",
+        "Thread goes through me",
+        "I'm sharp and pointed"
+      ],
+      "difficulty": "hard"
     }
   ]
 }
