@@ -1,6 +1,6 @@
 # Abyryst - Task List
 
-**Last Updated:** 2026-01-01
+**Last Updated:** 2026-01-01 (Day 2-3 Plan Created)
 
 ## Legend
 - ✅ Completed
@@ -32,17 +32,62 @@
 - [x] Write TODO.md
 - [x] Write PROGRESS.md
 
-### Day 2-3 - Core Game Loop 📋
-- [ ] Expand to 5x5 labyrinth
-- [ ] Add tile types (path, puzzle, intersection)
-- [ ] Create PuzzleScene base class
-- [ ] Implement Riddle puzzle type
-- [ ] Add story card system (JSON data)
-- [ ] Display story cards on tile entry
-- [ ] Add puzzle completion → path reveal mechanic
-- [ ] Create UI overlay (score, timer, hints)
-- [ ] Add sound effects (movement, puzzle solve)
-- [ ] Test playability with 5 users
+### Day 2-3 - Core Game Loop 🚧 IN PROGRESS
+
+#### Phase 1: Grid Expansion (2-3h)
+- [ ] Update Generator.js with postProcessTiles() method
+- [ ] Add randomPuzzleId() and shuffleArray() helpers
+- [ ] Change GameScene to 5x5 grid
+- [ ] Reduce tileSize to 100px
+- [ ] Add visual indicators for puzzle tiles (yellow circle + "?")
+- [ ] Add visual indicators for intersection tiles (pink star)
+
+#### Phase 2: Game State Management (1-2h)
+- [ ] Create GameState.js system
+- [ ] Create UIOverlay.js scene
+- [ ] Integrate GameState into GameScene
+- [ ] Launch UIOverlay in parallel with GameScene
+- [ ] Track visited tiles in tryMove()
+
+#### Phase 3: Story System (2-3h)
+- [ ] Create stories.json with 2 lineages (5 cards each)
+- [ ] Create StoryManager.js
+- [ ] Create StoryScene.js with continue button
+- [ ] Show intro story on game start
+- [ ] Add handleTileEntry() method to GameScene
+- [ ] Add launchPuzzle() and handleIntersection() methods
+- [ ] Integrate story triggers into movement
+
+#### Phase 4: Puzzle System (3-4h)
+- [ ] Create puzzles.json with 6 riddles
+- [ ] Create PuzzleManager.js
+- [ ] Create base PuzzleScene.js
+- [ ] Create RiddlePuzzleScene.js
+- [ ] Add HTML input field for answers
+- [ ] Implement hint system
+- [ ] Add answer validation
+- [ ] Add DOM cleanup on scene stop
+
+#### Phase 5: Sound System (1h)
+- [ ] Create/find 3 audio files (move, solve, error)
+- [ ] Add preload() method to GameScene
+- [ ] Play move sound on movement
+- [ ] Play solve/error sounds in PuzzleScene
+
+#### Phase 6: Scene Registration (30m)
+- [ ] Register all scenes in main.js
+- [ ] Verify scene transitions work correctly
+- [ ] Test pause/resume functionality
+
+#### Phase 7: Polish & Testing (2-3h)
+- [ ] Prevent movement during puzzles
+- [ ] Prevent duplicate puzzle launches
+- [ ] Add solved indicator animation
+- [ ] Fix mobile input positioning
+- [ ] Update win condition with final story
+- [ ] Test full playthrough
+- [ ] Test on mobile device
+- [ ] Fix any bugs found
 
 ### Day 4 - Polish & Testing 📋
 - [ ] Add animations (player movement, tile reveals)
