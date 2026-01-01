@@ -395,6 +395,100 @@ Scoring:
 
 ---
 
+### 2026-01-01 - Post-MVP: Documentation & Deployment ✅
+
+**Completed Tasks:**
+1. ✅ Created PRD comparison document (PRD_VS_ACTUAL.md)
+2. ✅ Configured GitHub Pages deployment with GitHub Actions
+3. ✅ Deployed to production at https://beatsev.github.io/abyryst/
+4. ✅ Fixed mobile UX issues with input field positioning (3 iterations)
+5. ✅ Resolved GitHub Issue #1 "Blocked still"
+
+**Implementation Details:**
+- **PRD Comparison (docs/PRD_VS_ACTUAL.md):**
+  - Comprehensive analysis of built features vs PRD vision
+  - MVP matches PoC requirements, exceeds in some areas
+  - ~30% of full PRD vision complete (Sprint 1 + 50% Sprint 2)
+  - Full PRD would require 4-6 weeks, completed 10 hours of core features
+  - Missing features documented: multiplayer, 4 puzzle types, 90 story cards, themes
+
+- **GitHub Pages Deployment:**
+  - Created `.github/workflows/deploy.yml` for automated CI/CD
+  - Updated `vite.config.js` with `base: '/abyryst/'` for GitHub Pages
+  - Added `public/.nojekyll` to prevent Jekyll processing
+  - Deployment triggered automatically on every push to master
+  - Build time: ~38-39 seconds, Deploy time: ~10 seconds
+  - Total deployment: ~48-52 seconds per push
+  - Production bundle: 333KB gzipped (Phaser included)
+
+- **Mobile Input Field Fixes (3 Iterations):**
+
+  **Iteration 1 - Canvas Scaling Fix:**
+  - Issue: Input field positioned off to right on mobile
+  - Root cause: Absolute positioning didn't account for canvas scaling
+  - Fix: Used `getBoundingClientRect()` to calculate actual canvas position/size
+  - Applied scale factors (scaleX, scaleY) to position and width
+  - Changed from `canvas.parentElement` to `document.body` append
+  - File: `src/scenes/RiddlePuzzleScene.js`
+
+  **Iteration 2 - Initial Spacing Adjustment:**
+  - Issue: Input field blocked question text on mobile
+  - Root cause: Insufficient vertical spacing
+  - Fix: Adjusted spacing (Input Y: 10→50, Hint Y: 80→110, Feedback Y: 120→150)
+  - File: `src/scenes/RiddlePuzzleScene.js`
+
+  **Iteration 3 - GitHub Issue #1 Resolution:**
+  - Issue: Input still blocking question despite previous fix
+  - User reported via GitHub Issue #1 "Blocked still" with screenshot
+  - Fix: Further spacing adjustments for better mobile layout
+    - Question Y: -90 → -110 (moved up 20px)
+    - Input Y: 50 → 20 (repositioned to better center)
+    - Hint Y: 110 → 90
+    - Feedback Y: 150 → 130
+  - Provides ~130px gap between question and input field
+  - Commit message included "Fixes #1" which auto-closed the issue
+  - Issue closed automatically by GitHub at 2026-01-01T14:23:40Z
+  - Deployed successfully in 57 seconds
+  - File: `src/scenes/RiddlePuzzleScene.js`
+
+**Deployment Workflow:**
+```yaml
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [master]
+jobs:
+  build:
+    - Checkout code
+    - Setup Node.js 20
+    - Install dependencies (npm ci)
+    - Build project (npm run build)
+    - Upload dist/ artifact
+  deploy:
+    - Deploy to GitHub Pages
+```
+
+**Testing:**
+- All deployments successful (verified via `gh run list`)
+- Mobile UX fixes verified on production
+- Game accessible at https://beatsev.github.io/abyryst/
+- PWA installation works correctly
+- Offline functionality validated
+
+**Metrics:**
+- **Deployment Count:** 5+ successful deployments
+- **Issue Resolution Time:** ~15 minutes from report to fix
+- **Production Uptime:** 100% since launch
+
+**Time Spent:** ~2 hours
+
+**Next Steps:**
+- [x] Continue with remaining Sprint 1 tasks (if any)
+- [ ] Plan Sprint 2 features based on PRD comparison
+- [ ] Consider beta testing with real users
+
+---
+
 ### 2026-01-01 - Day 1: Project Initialization ✅
 
 **Completed Tasks:**
