@@ -1,0 +1,64 @@
+{
+  "lineages": {
+    "A": {
+      "name": "Hero's Quest",
+      "cards": [
+        {
+          "id": "a1",
+          "text": "Ancient runes glow on the entrance wall. A whisper echoes: 'Only the worthy may pass through these halls.'",
+          "triggerType": "start"
+        },
+        {
+          "id": "a2",
+          "text": "You discover a dusty scroll on the floor. It describes a legendary artifact hidden deep within the labyrinth, sought by heroes for centuries.",
+          "triggerType": "puzzle"
+        },
+        {
+          "id": "a3",
+          "text": "Strange symbols align on the ancient stones before you. They seem to form a riddle, testing your wisdom and wit.",
+          "triggerType": "puzzle"
+        },
+        {
+          "id": "a4",
+          "text": "Two paths diverge ahead. One bears the mark of the ancients, glowing with golden light. The other whispers of forgotten shadows and untold secrets.",
+          "triggerType": "intersection"
+        },
+        {
+          "id": "a5",
+          "text": "A glimmering light reveals the final chamber ahead. The artifact awaits, and your heroic quest nears its triumphant end.",
+          "triggerType": "end"
+        }
+      ]
+    },
+    "B": {
+      "name": "Villain's Plot",
+      "cards": [
+        {
+          "id": "b1",
+          "text": "Dark energy pulses through the walls. The air is thick with malice. Someone has been here before you, leaving a trail of corruption.",
+          "triggerType": "start"
+        },
+        {
+          "id": "b2",
+          "text": "Claw marks scar the ancient stones. You sense a trap has been laid for the unwary. Darkness watches from every shadow.",
+          "triggerType": "puzzle"
+        },
+        {
+          "id": "b3",
+          "text": "A sinister presence lingers here. The puzzle before you reeks of deception, designed to ensnare those who seek power.",
+          "triggerType": "puzzle"
+        },
+        {
+          "id": "b4",
+          "text": "The path splits ominously. One way promises forbidden power and dominion. The other offers a chance at redemption, though the price may be steep.",
+          "triggerType": "intersection"
+        },
+        {
+          "id": "b5",
+          "text": "The final chamber looms, shrouded in shadow. Will you confront the darkness that dwells within, or become one with it?",
+          "triggerType": "end"
+        }
+      ]
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import LabyrinthGenerator from '../systems/Generator.js';
 import GameState from '../systems/GameState.js';
+import StoryManager from '../systems/StoryManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -9,6 +10,7 @@ export default class GameScene extends Phaser.Scene {
     this.playerPos = { x: 0, y: 0 };
     this.tileSize = 100;
     this.gameState = new GameState();
+    this.storyManager = null;
   }
 
   create() {
@@ -69,6 +71,19 @@ export default class GameScene extends Phaser.Scene {
     this.swipeStartX = 0;
     this.swipeStartY = 0;
     this.swipeMinDistance = 50;
+
+    // Initialize story manager
+    this.storyManager = new StoryManager(this.gameState);
+
+    // Show intro story
+    const introStory = this.storyManager.getNextStory('start');
+    if (introStory) {
+      this.scene.pause();
+      this.scene.launch('StoryScene', {
+        storyCard: introStory,
+        nextScene: 'GameScene'
+      });
+    }
   }
 
   setupTouchControls() {
@@ -146,6 +161,9 @@ export default class GameScene extends Phaser.Scene {
 
       // Track visited tile
       this.gameState.markTileVisited(newPos.x, newPos.y);
+
+      // Handle special tile events (puzzles, intersections)
+      this.handleTileEntry(newPos);
 
       this.checkWinCondition();
 
@@ -303,17 +321,99 @@ export default class GameScene extends Phaser.Scene {
 
   checkWinCondition() {
     if (this.playerPos.x === this.labyrinth.end.x && this.playerPos.y === this.labyrinth.end.y) {
-      this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, 'YOU WIN!', {
-        fontSize: '48px',
-        fontFamily: 'Arial Black',
-        color: '#4ecca3',
-        backgroundColor: '#000000',
-        padding: { x: 20, y: 10 }
-      }).setOrigin(0.5).setDepth(1000);
+      // Show end story with final score
+      const endStory = this.storyManager.getNextStory('end');
+      if (endStory) {
+        this.scene.pause();
+        this.scene.launch('StoryScene', {
+          storyCard: {
+            ...endStory,
+            text: endStory.text + `\n\nFinal Score: ${this.gameState.score}\nTime: ${this.gameState.formatTime()}`
+          },
+          nextScene: 'MenuScene'
+        });
 
-      this.time.delayedCall(2000, () => {
-        this.scene.start('MenuScene');
+        this.time.delayedCall(3000, () => {
+          this.scene.stop('StoryScene');
+          this.scene.stop('UIOverlay');
+          this.scene.start('MenuScene');
+        });
+      } else {
+        // Fallback if no end story
+        this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, 'YOU WIN!', {
+          fontSize: '48px',
+          fontFamily: 'Arial Black',
+          color: '#4ecca3',
+          backgroundColor: '#000000',
+          padding: { x: 20, y: 10 }
+        }).setOrigin(0.5).setDepth(1000);
+
+        this.time.delayedCall(2000, () => {
+          this.scene.stop('UIOverlay');
+          this.scene.start('MenuScene');
+        });
+      }
+    }
+  }
+
+  /**
+   * Handle tile entry - check for puzzles, intersections, etc.
+   * @param {Object} pos - Tile position {x, y}
+   */
+  handleTileEntry(pos) {
+    const tile = this.labyrinth.grid[pos.y][pos.x];
+
+    if (tile.type === 'puzzle' && !this.gameState.solvedPuzzles.includes(tile.puzzleId)) {
+      // Show story before puzzle
+      const story = this.storyManager.getNextStory('puzzle');
+      if (story) {
+        this.scene.pause();
+        this.scene.launch('StoryScene', {
+          storyCard: story,
+          nextScene: 'GameScene',
+          nextSceneData: {
+            launchPuzzle: true,
+            puzzleId: tile.puzzleId,
+            playerPos: pos
+          }
+        });
+      } else {
+        // No story, launch puzzle directly
+        this.launchPuzzle(tile.puzzleId, pos);
+      }
+    } else if (tile.type === 'intersection') {
+      this.handleIntersection(pos);
+    }
+  }
+
+  /**
+   * Launch a puzzle scene
+   * @param {string} puzzleId - Puzzle identifier
+   * @param {Object} pos - Player position
+   */
+  launchPuzzle(puzzleId, pos) {
+    // Placeholder for Phase 4 - will launch RiddlePuzzleScene
+    console.log(`Would launch puzzle: ${puzzleId} at position`, pos);
+    // For now, just mark as solved automatically
+    this.gameState.markPuzzleSolved(puzzleId);
+  }
+
+  /**
+   * Handle intersection tile - switch lineage
+   * @param {Object} pos - Tile position
+   */
+  handleIntersection(pos) {
+    const story = this.storyManager.getNextStory('intersection');
+    if (story) {
+      this.scene.pause();
+      this.scene.launch('StoryScene', {
+        storyCard: story,
+        nextScene: 'GameScene'
       });
+
+      // Toggle lineage
+      const newLineage = this.gameState.currentLineage === 'A' ? 'B' : 'A';
+      this.storyManager.switchLineage(newLineage);
     }
   }
 }
