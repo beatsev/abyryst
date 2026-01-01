@@ -60,20 +60,20 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       padding: { x: 10, y: 4 }
     }).setOrigin(0.5);
 
-    // Question text
-    this.add.text(width / 2, height / 2 - 90, puzzle.question, {
+    // Question text (positioned higher for more space)
+    this.add.text(width / 2, height / 2 - 110, puzzle.question, {
       fontSize: '18px',
       color: '#ffffff',
       align: 'center',
       wordWrap: { width: cardWidth - 60 }
     }).setOrigin(0.5);
 
-    // Create HTML input field (positioned lower to avoid blocking question)
-    const inputY = height / 2 + 50;
+    // Create HTML input field (positioned significantly lower to avoid blocking question)
+    const inputY = height / 2 + 20;
     this.createInputField(width / 2, inputY, cardWidth - 100);
 
     // Hint section
-    this.hintText = this.add.text(width / 2, height / 2 + 110, '', {
+    this.hintText = this.add.text(width / 2, height / 2 + 90, '', {
       fontSize: '14px',
       color: '#ffcc00',
       align: 'center',
@@ -82,7 +82,7 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Feedback text (for correct/incorrect messages)
-    this.feedbackText = this.add.text(width / 2, height / 2 + 150, '', {
+    this.feedbackText = this.add.text(width / 2, height / 2 + 130, '', {
       fontSize: '16px',
       color: '#ffffff',
       align: 'center',
