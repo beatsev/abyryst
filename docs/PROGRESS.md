@@ -115,9 +115,69 @@ Abyryst is a procedurally generated labyrinth mystery game built as a PWA using 
 **Time Spent:** ~30 minutes
 
 **Next Steps:**
-- [ ] Begin Phase 3: Story System
-- [ ] Create stories.json with lineage data
-- [ ] Create StoryManager.js
+- [x] Begin Phase 3: Story System
+- [x] Create stories.json with lineage data
+- [x] Create StoryManager.js
+
+---
+
+### 2026-01-01 - Phase 3: Story System ✅
+
+**Completed Tasks:**
+1. ✅ Created stories.json with dual narrative lineages
+2. ✅ Created StoryManager.js for story progression logic
+3. ✅ Created StoryScene.js as modal story card display
+4. ✅ Integrated story system into GameScene
+5. ✅ Registered StoryScene in main.js
+6. ✅ Committed and pushed Phase 3 to GitHub
+
+**Implementation Details:**
+- **stories.json** contains 2 lineages (A: "Hero's Quest", B: "Villain's Plot")
+  - 5 story cards per lineage (start, puzzle×2, intersection, end)
+  - Each card has id, text, triggerType for event matching
+- **StoryManager** manages story progression:
+  - getNextStory(triggerType) returns appropriate story cards
+  - switchLineage() changes narrative path at intersections
+  - Cycles through available cards of each type
+- **StoryScene** displays modal story cards:
+  - Dim background overlay (80% black) blocks input to scenes below
+  - Story card panel with decorative styling and border
+  - Continue button with hover effects
+  - Enter/Space key support for keyboard users
+  - Supports chaining to puzzle scenes via nextSceneData parameter
+- **GameScene Integration:**
+  - Show intro story on game start (pause game, launch StoryScene)
+  - handleTileEntry() checks tile types on player movement
+  - launchPuzzle() placeholder for Phase 4 (currently auto-solves)
+  - handleIntersection() switches lineage and shows intersection story
+  - checkWinCondition() shows end story with final score and time
+  - Story appears BEFORE puzzles to provide narrative context
+
+**Story Flow:**
+```
+Start → Intro Story → Player moves → Puzzle Tile → Puzzle Story → [Launch Puzzle - Phase 4]
+→ Continue exploring → Intersection Tile → Intersection Story → Switch Lineage
+→ Continue to end → End Story with score/time → Return to MenuScene
+```
+
+**Scene Management:**
+- All overlays use `scene.pause()` / `scene.resume()` to preserve game state
+- StoryScene blocks input to underlying scenes with interactive rectangle
+- UIOverlay persists throughout (shows score/timer even during stories)
+
+**Testing:**
+- Dev server reloaded successfully, no errors
+- Intro story displays on game start
+- Story cards appear at correct trigger points
+- Continue button and keyboard shortcuts work
+- Scene transitions work correctly (pause/resume)
+
+**Time Spent:** ~2 hours
+
+**Next Steps:**
+- [ ] Begin Phase 4: Puzzle System
+- [ ] Create puzzles.json with 6 riddles
+- [ ] Create PuzzleManager.js
 
 ---
 
