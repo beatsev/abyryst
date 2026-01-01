@@ -82,9 +82,42 @@ Abyryst is a procedurally generated labyrinth mystery game built as a PWA using 
 **Time Spent:** ~45 minutes
 
 **Next Steps:**
-- [ ] Begin Phase 2: Game State Management
-- [ ] Create GameState.js system
-- [ ] Create UIOverlay.js scene
+- [x] Begin Phase 2: Game State Management
+- [x] Create GameState.js system
+- [x] Create UIOverlay.js scene
+
+---
+
+### 2026-01-01 - Phase 2: Game State Management ✅
+
+**Completed Tasks:**
+1. ✅ Created GameState.js for centralized state management
+2. ✅ Created UIOverlay.js scene as persistent HUD
+3. ✅ Integrated GameState into GameScene
+4. ✅ Launch UIOverlay in parallel with GameScene
+5. ✅ Track visited tiles in tryMove()
+6. ✅ Registered UIOverlay scene in main.js
+
+**Implementation Details:**
+- **GameState** manages: score, timer, hints (3), lineage (A/B), visitedTiles[], solvedPuzzles[]
+- **UIOverlay** displays top bar: Score (left), Timer (center), Hints (right)
+- Timer updates every 1 second via Phaser timer event
+- UI overlay uses setScrollFactor(0) and high depth (1000+) to stay fixed
+- markTileVisited() called on every successful move
+- markPuzzleSolved() awards 100 points per puzzle
+
+**Testing:**
+- Dev server reloaded successfully, no errors
+- UI overlay visible at top of screen
+- Timer counting up from 00:00
+- Score starts at 0, hints at 3
+
+**Time Spent:** ~30 minutes
+
+**Next Steps:**
+- [ ] Begin Phase 3: Story System
+- [ ] Create stories.json with lineage data
+- [ ] Create StoryManager.js
 
 ---
 
