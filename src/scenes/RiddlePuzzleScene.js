@@ -52,13 +52,13 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const buttonHeight = 140; // Fixed height for bottom buttons
     const contentHeight = cardHeight - headerHeight - buttonHeight;
 
-    // Zone positions (guaranteed no overlap)
+    // Zone positions (optimized for better input/hints spacing)
     const zones = {
       header: cardTop + 15,
       questionTop: cardTop + headerHeight,
-      questionMax: cardTop + headerHeight + (contentHeight * 0.45), // Top 45% for question
-      input: cardTop + headerHeight + (contentHeight * 0.50),        // Input at 50% mark
-      feedback: cardTop + headerHeight + (contentHeight * 0.70),     // Feedback at 70% mark
+      questionMax: cardTop + headerHeight + (contentHeight * 0.40), // Top 40% for question
+      input: cardTop + headerHeight + (contentHeight * 0.45),        // Input at 45% mark
+      feedback: cardTop + headerHeight + (contentHeight * 0.62),     // Feedback at 62% mark (more space from input)
       buttons: cardBottom - buttonHeight
     };
 
@@ -87,9 +87,9 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       wordWrap: { width: cardWidth - 80 }
     }).setOrigin(0.5);
 
-    // INPUT ZONE: Always at 50% mark - guaranteed not to overlap
-    const inputHeight = 40;
-    this.createInputField(width / 2, zones.input, cardWidth - 100);
+    // INPUT ZONE: Compact input field to maximize hint visibility
+    const inputHeight = 32;
+    this.createInputField(width / 2, zones.input, cardWidth - 120);
 
     // FEEDBACK ZONE: Hints and feedback below input
     this.hintText = this.add.text(width / 2, zones.feedback - 20, '', {
@@ -183,11 +183,11 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const scaledWidth = width * scaleX;
 
     inputElement.style.left = `${scaledX - (scaledWidth / 2)}px`;
-    inputElement.style.top = `${scaledY - 20}px`;
+    inputElement.style.top = `${scaledY - 16}px`;
     inputElement.style.width = `${scaledWidth}px`;
-    inputElement.style.height = '40px';
-    inputElement.style.fontSize = '18px';
-    inputElement.style.padding = '8px';
+    inputElement.style.height = '32px';
+    inputElement.style.fontSize = '15px';
+    inputElement.style.padding = '6px';
     inputElement.style.border = '2px solid #4ecca3';
     inputElement.style.borderRadius = '4px';
     inputElement.style.backgroundColor = '#0e1628';
