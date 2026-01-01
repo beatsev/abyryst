@@ -150,9 +150,21 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     inputElement.type = 'text';
     inputElement.placeholder = 'Type your answer...';
     inputElement.style.position = 'absolute';
-    inputElement.style.left = `${x - width / 2}px`;
-    inputElement.style.top = `${y - 20}px`;
-    inputElement.style.width = `${width}px`;
+
+    // Get canvas position and scale to properly position input
+    const canvas = this.game.canvas;
+    const canvasRect = canvas.getBoundingClientRect();
+    const scaleX = canvasRect.width / canvas.width;
+    const scaleY = canvasRect.height / canvas.height;
+
+    // Calculate scaled position relative to viewport
+    const scaledX = canvasRect.left + (x * scaleX);
+    const scaledY = canvasRect.top + (y * scaleY);
+    const scaledWidth = width * scaleX;
+
+    inputElement.style.left = `${scaledX - (scaledWidth / 2)}px`;
+    inputElement.style.top = `${scaledY - 20}px`;
+    inputElement.style.width = `${scaledWidth}px`;
     inputElement.style.height = '40px';
     inputElement.style.fontSize = '18px';
     inputElement.style.padding = '8px';
@@ -164,8 +176,8 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     inputElement.style.outline = 'none';
     inputElement.style.zIndex = '1000';
 
-    // Add to DOM
-    this.game.canvas.parentElement.appendChild(inputElement);
+    // Add to body instead of canvas parent for better positioning
+    document.body.appendChild(inputElement);
     this.inputElement = inputElement;
 
     // Focus on input
