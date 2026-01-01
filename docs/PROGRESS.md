@@ -51,9 +51,40 @@ Abyryst is a procedurally generated labyrinth mystery game built as a PWA using 
 - `docs/TODO.md` - Added 7-phase breakdown for Day 2-3
 
 **Next Steps**:
-- [ ] Begin Phase 1: Grid Expansion
-- [ ] Update Generator.js with postProcessTiles()
-- [ ] Change GameScene to 5x5 grid
+- [x] Begin Phase 1: Grid Expansion
+- [x] Update Generator.js with postProcessTiles()
+- [x] Change GameScene to 5x5 grid
+
+---
+
+### 2026-01-01 - Phase 1: Grid Expansion ✅
+
+**Completed Tasks:**
+1. ✅ Updated Generator.js with postProcessTiles() method
+2. ✅ Added randomPuzzleId() and shuffleArray() helper methods
+3. ✅ Changed GameScene to generate 5x5 labyrinth
+4. ✅ Reduced tileSize from 120px to 100px
+5. ✅ Added visual indicators for puzzle tiles (yellow circle + "?")
+6. ✅ Added visual indicators for intersection tiles (pink star)
+
+**Implementation Details:**
+- Post-processing assigns ~40% of path tiles as puzzles (6 tiles in 5x5)
+- 2 intersection tiles randomly assigned from remaining path tiles
+- Each puzzle tile gets a random riddle ID (riddle_1 through riddle_6)
+- Intersection tiles randomly assigned to lineage A or B
+- Visual indicators use Phaser shapes: circles for puzzles, stars for intersections
+
+**Testing:**
+- Dev server reloaded successfully, no errors
+- 5x5 grid renders correctly on 800x600 canvas
+- Visual indicators display on appropriate tiles
+
+**Time Spent:** ~45 minutes
+
+**Next Steps:**
+- [ ] Begin Phase 2: Game State Management
+- [ ] Create GameState.js system
+- [ ] Create UIOverlay.js scene
 
 ---
 
