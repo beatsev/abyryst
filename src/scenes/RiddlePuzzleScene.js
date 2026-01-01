@@ -47,18 +47,20 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const cardTop = height / 2 - cardHeight / 2;
     const cardBottom = height / 2 + cardHeight / 2;
 
-    // Define layout zones (percentages of card height for predictable layout)
+    // Define layout zones (input moved to bottom for better mobile UX)
     const headerHeight = 80;  // Fixed height for title + badge
+    const inputHeight = 45;   // Space for input field above buttons
     const buttonHeight = 140; // Fixed height for bottom buttons
-    const contentHeight = cardHeight - headerHeight - buttonHeight;
+    const contentHeight = cardHeight - headerHeight - inputHeight - buttonHeight;
 
-    // Zone positions (optimized for better input/hints spacing)
+    // Zone positions (question → hints → input → buttons)
     const zones = {
       header: cardTop + 15,
       questionTop: cardTop + headerHeight,
-      questionMax: cardTop + headerHeight + (contentHeight * 0.40), // Top 40% for question
-      input: cardTop + headerHeight + (contentHeight * 0.45),        // Input at 45% mark
-      feedback: cardTop + headerHeight + (contentHeight * 0.62),     // Feedback at 62% mark (more space from input)
+      question: cardTop + headerHeight + (contentHeight * 0.30),     // Question in top 30%
+      hints: cardTop + headerHeight + (contentHeight * 0.60),        // Hints in middle (plenty of space)
+      feedback: cardTop + headerHeight + (contentHeight * 0.80),     // Feedback below hints
+      input: cardBottom - buttonHeight - inputHeight,                 // Input at bottom above buttons
       buttons: cardBottom - buttonHeight
     };
 
@@ -78,21 +80,16 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       padding: { x: 10, y: 4 }
     }).setOrigin(0.5);
 
-    // QUESTION ZONE: Center question in available space
-    const questionCenterY = zones.questionTop + ((zones.input - zones.questionTop) / 2);
-    const questionText = this.add.text(width / 2, questionCenterY, puzzle.question, {
+    // QUESTION ZONE: Question at top of content area
+    const questionText = this.add.text(width / 2, zones.question, puzzle.question, {
       fontSize: '17px',
       color: '#ffffff',
       align: 'center',
       wordWrap: { width: cardWidth - 80 }
     }).setOrigin(0.5);
 
-    // INPUT ZONE: Compact input field to maximize hint visibility
-    const inputHeight = 32;
-    this.createInputField(width / 2, zones.input, cardWidth - 120);
-
-    // FEEDBACK ZONE: Hints and feedback below input
-    this.hintText = this.add.text(width / 2, zones.feedback - 20, '', {
+    // HINTS ZONE: Clear space in middle for hints (won't be blocked by input)
+    this.hintText = this.add.text(width / 2, zones.hints, '', {
       fontSize: '13px',
       color: '#ffcc00',
       align: 'center',
@@ -100,12 +97,16 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       fontStyle: 'italic'
     }).setOrigin(0.5);
 
-    this.feedbackText = this.add.text(width / 2, zones.feedback + 10, '', {
+    // FEEDBACK ZONE: Success/error messages below hints
+    this.feedbackText = this.add.text(width / 2, zones.feedback, '', {
       fontSize: '15px',
       color: '#ffffff',
       align: 'center',
       fontStyle: 'bold'
     }).setOrigin(0.5);
+
+    // INPUT ZONE: At bottom above buttons (mobile-friendly keyboard position)
+    this.createInputField(width / 2, zones.input, cardWidth - 120);
 
     // BUTTON ZONE: Fixed at bottom
     const actionButtonY = zones.buttons + 40;
