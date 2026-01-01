@@ -83,13 +83,24 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       align: 'center',
       wordWrap: { width: cardWidth - 60 }
     }).setOrigin(0.5);
-    // Use actual text bounds to calculate next position
-    currentY += Math.max(questionText.height, 40) + spacing.large;
 
-    // Create HTML input field (positioned relative to question)
+    // Force text update to get accurate bounds after word wrap
+    questionText.updateText();
+    const questionBounds = questionText.getBounds();
+    const questionHeight = questionBounds.height;
+
+    // Calculate position after question with spacing
+    currentY += questionHeight + spacing.large;
+
+    // Ensure input is positioned at a safe minimum Y to prevent overlap
+    // even with longest multi-line questions (accounts for 4-5 line questions)
+    const minimumInputY = cardTop + 180; // Guaranteed safe position
+    const inputY = Math.max(currentY, minimumInputY);
+
+    // Create HTML input field at safe position
     const inputHeight = 40;
-    this.createInputField(width / 2, currentY + inputHeight / 2, cardWidth - 100);
-    currentY += inputHeight + spacing.medium;
+    this.createInputField(width / 2, inputY + inputHeight / 2, cardWidth - 100);
+    currentY = inputY + inputHeight + spacing.medium;
 
     // Hint section (positioned relative to input, will expand when hints shown)
     this.hintText = this.add.text(width / 2, currentY, '', {
