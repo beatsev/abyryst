@@ -319,9 +319,79 @@ win:   1.0-2.0s, victory fanfare, volume 0.6
 **Time Spent:** ~1 hour
 
 **Next Steps:**
-- [ ] Begin Phase 6: Integration & Polish
-- [ ] Test full game flow end-to-end
-- [ ] Add sound toggle button to UI
+- [x] Begin Phase 6: Integration & Polish
+- [x] Test full game flow end-to-end
+- [x] Add sound toggle button to UI
+
+---
+
+### 2026-01-01 - Phase 6 & 7: Integration, Polish & Completion ✅
+
+**Completed Tasks:**
+1. ✅ Added sound toggle button to UIOverlay (🔊/🔇)
+2. ✅ Updated README.md with comprehensive documentation
+3. ✅ Tested full game flow end-to-end
+4. ✅ Verified all systems integration
+5. ✅ Committed final polish changes to GitHub
+
+**Implementation Details:**
+- **Sound Toggle UI:**
+  - Added interactive button in top-right of UIOverlay
+  - Hover effect with 1.1x scale animation
+  - Icon changes between 🔊 (enabled) and 🔇 (disabled)
+  - Global sound control accessible during gameplay
+  - Positioned after hints indicator for balanced layout
+
+- **README.md Updates:**
+  - Comprehensive feature list with current status
+  - Detailed gameplay instructions and controls
+  - Full project structure documentation
+  - Replay value calculations (38,760 combinations)
+  - Contributing guidelines and development notes
+  - Tech stack details and quick start guide
+
+- **Integration Verification:**
+  - All 5 scenes properly registered in main.js
+  - Manager instances passed correctly between scenes
+  - State persistence works across scene transitions
+  - Sound system integrated throughout all interactions
+  - PWA configuration validated
+
+**Final Game Features:**
+```
+Core Systems:
+- 5×5 procedural labyrinth generation ✅
+- 20 riddles with 3 difficulty levels ✅
+- Dual story lineages (A/B) ✅
+- Mobile touch controls + swipe ✅
+- Keyboard fallback support ✅
+- Centralized state management ✅
+- Persistent HUD overlay ✅
+- Sound system architecture ✅
+- PWA offline-first ✅
+
+Game Flow:
+Start → Intro Story → Navigate Labyrinth → Puzzle Story →
+Riddle Puzzle → Continue → Intersection Story → Lineage Switch →
+Continue → End Story → Final Score → Menu
+
+Scoring:
+- Base: 100 points per puzzle
+- Bonus: +20 per unused hint (max +60 per puzzle)
+- Max possible: 960 points (6 puzzles × 160)
+```
+
+**Project Statistics:**
+- **Total Files Created:** 18
+- **Total Lines of Code:** ~2,500
+- **Scenes:** 5 (Menu, Game, UIOverlay, Story, RiddlePuzzle)
+- **Systems:** 5 (Generator, GameState, StoryManager, PuzzleManager, SoundManager)
+- **Data Files:** 2 (20 riddles, 10 story cards)
+- **Development Time:** ~10 hours across 7 phases
+
+**Time Spent:** ~1.5 hours
+
+**Project Status:** ✅ **MVP COMPLETE**
 
 ---
 
