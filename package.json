@@ -1,0 +1,31 @@
+{
+  "name": "abyryst",
+  "version": "1.0.0",
+  "description": "Abyryst - Procedurally generated labyrinth mystery game",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beatsev/abyryst.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/beatsev/abyryst/issues"
+  },
+  "homepage": "https://github.com/beatsev/abyryst#readme",
+  "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
+    "vite": "^7.3.0",
+    "vite-plugin-pwa": "^1.2.0"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  }
+}
