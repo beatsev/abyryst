@@ -53,6 +53,9 @@ export default class LabyrinthGenerator {
     // Post-process tiles to assign puzzle and intersection types
     this.postProcessTiles(grid, width, height, start, end);
 
+    // Guarantee at least one puzzle on critical path
+    this.guaranteePuzzleOnPath(grid, width, height, start, end);
+
     return {
       width,
       height,
@@ -107,17 +110,139 @@ export default class LabyrinthGenerator {
   }
 
   /**
+   * Find shortest path from start to end using BFS
+   * @param {Array} grid - The maze grid
+   * @param {Object} start - Start position {x, y}
+   * @param {Object} end - End position {x, y}
+   * @returns {Array} Array of {x, y} positions representing shortest path
+   */
+  static findShortestPath(grid, start, end) {
+    const queue = [{ pos: start, path: [start] }];
+    const visited = new Set();
+    visited.add(`${start.x},${start.y}`);
+
+    while (queue.length > 0) {
+      const { pos, path } = queue.shift();
+
+      // Check if we reached the end
+      if (pos.x === end.x && pos.y === end.y) {
+        return path;
+      }
+
+      // Explore neighbors based on connections
+      const tile = grid[pos.y][pos.x];
+      const neighbors = [];
+
+      if (tile.connections.N && pos.y > 0) {
+        neighbors.push({ x: pos.x, y: pos.y - 1 });
+      }
+      if (tile.connections.S && pos.y < grid.length - 1) {
+        neighbors.push({ x: pos.x, y: pos.y + 1 });
+      }
+      if (tile.connections.E && pos.x < grid[0].length - 1) {
+        neighbors.push({ x: pos.x + 1, y: pos.y });
+      }
+      if (tile.connections.W && pos.x > 0) {
+        neighbors.push({ x: pos.x - 1, y: pos.y });
+      }
+
+      for (const next of neighbors) {
+        const key = `${next.x},${next.y}`;
+        if (!visited.has(key) && grid[next.y][next.x].type !== 'empty') {
+          visited.add(key);
+          queue.push({
+            pos: next,
+            path: [...path, next]
+          });
+        }
+      }
+    }
+
+    // Should never happen with valid maze, but return empty array as fallback
+    console.warn('No path found from start to end - maze generation error');
+    return [];
+  }
+
+  /**
+   * Ensure at least one puzzle exists on the critical path
+   * @param {Array} grid - The maze grid
+   * @param {number} width - Grid width
+   * @param {number} height - Grid height
+   * @param {Object} start - Start position
+   * @param {Object} end - End position
+   */
+  static guaranteePuzzleOnPath(grid, width, height, start, end) {
+    // Find critical path using BFS
+    const criticalPath = this.findShortestPath(grid, start, end);
+
+    if (criticalPath.length === 0) {
+      console.warn('No path found from start to end - cannot guarantee puzzle');
+      return;
+    }
+
+    // Check if any tile on critical path is already a puzzle
+    const hasPuzzleOnPath = criticalPath.some(pos =>
+      grid[pos.y][pos.x].type === 'puzzle'
+    );
+
+    if (hasPuzzleOnPath) {
+      // Already have at least one puzzle on critical path
+      return;
+    }
+
+    // No puzzle on path - convert one random path tile on critical path to puzzle
+    // Exclude start and end tiles
+    const eligibleTiles = criticalPath.filter(pos =>
+      !(pos.x === start.x && pos.y === start.y) &&
+      !(pos.x === end.x && pos.y === end.y) &&
+      grid[pos.y][pos.x].type === 'path'
+    );
+
+    if (eligibleTiles.length === 0) {
+      console.warn('No eligible tiles on critical path to convert to puzzle');
+      return;
+    }
+
+    // Choose random tile from eligible tiles
+    const randomIndex = Math.floor(Math.random() * eligibleTiles.length);
+    const chosenTile = eligibleTiles[randomIndex];
+
+    // Convert to puzzle
+    grid[chosenTile.y][chosenTile.x].type = 'puzzle';
+    grid[chosenTile.y][chosenTile.x].puzzleId = this.randomPuzzleId();
+  }
+
+  /**
    * Generate a random puzzle ID from pool of 20 riddles
+   * @param {number} difficultyMult - Difficulty multiplier (default 1.0)
    * @returns {string} Random puzzle ID
    */
-  static randomPuzzleId() {
-    const riddles = [
-      'riddle_1', 'riddle_2', 'riddle_3', 'riddle_4', 'riddle_5',
-      'riddle_6', 'riddle_7', 'riddle_8', 'riddle_9', 'riddle_10',
-      'riddle_11', 'riddle_12', 'riddle_13', 'riddle_14', 'riddle_15',
-      'riddle_16', 'riddle_17', 'riddle_18', 'riddle_19', 'riddle_20'
-    ];
-    return riddles[Math.floor(Math.random() * riddles.length)];
+  static randomPuzzleId(difficultyMult = 1.0) {
+    let pool = [];
+
+    if (difficultyMult < 0.8) {
+      // Easier: favor easy puzzles
+      pool = [
+        'riddle_1', 'riddle_2', 'riddle_7', 'riddle_8', 'riddle_9',
+        'riddle_10', 'riddle_11', 'riddle_3', 'riddle_4'
+      ];
+    } else if (difficultyMult > 1.2) {
+      // Harder: favor hard puzzles
+      pool = [
+        'riddle_5', 'riddle_6', 'riddle_16', 'riddle_18', 'riddle_19',
+        'riddle_20', 'riddle_12', 'riddle_13', 'riddle_14', 'riddle_15'
+      ];
+    } else {
+      // Normal: all puzzles
+      pool = [
+        'riddle_1', 'riddle_2', 'riddle_3', 'riddle_4', 'riddle_5',
+        'riddle_6', 'riddle_7', 'riddle_8', 'riddle_9', 'riddle_10',
+        'riddle_11', 'riddle_12', 'riddle_13', 'riddle_14', 'riddle_15',
+        'riddle_16', 'riddle_17', 'riddle_18', 'riddle_19', 'riddle_20'
+      ];
+    }
+
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
   /**

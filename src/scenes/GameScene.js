@@ -4,6 +4,7 @@ import GameState from '../systems/GameState.js';
 import StoryManager from '../systems/StoryManager.js';
 import PuzzleManager from '../systems/PuzzleManager.js';
 import SoundManager from '../systems/SoundManager.js';
+import IntersectionManager from '../systems/IntersectionManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -27,6 +28,7 @@ export default class GameScene extends Phaser.Scene {
     this.storyManager = new StoryManager(this.gameState);
     this.puzzleManager = new PuzzleManager(this.gameState);
     this.soundManager = new SoundManager(this);
+    this.intersectionManager = new IntersectionManager(this.gameState);
 
     // Launch UI overlay
     this.scene.launch('UIOverlay', {
@@ -202,6 +204,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   renderLabyrinth() {
+    // Clear existing graphics if any
+    if (this.labyrinthContainer) {
+      this.labyrinthContainer.destroy();
+    }
+
+    this.labyrinthContainer = this.add.container(0, 0);
+
     const { width, height } = this.cameras.main;
     const gridWidth = this.labyrinth.width * this.tileSize;
     const gridHeight = this.labyrinth.height * this.tileSize;
@@ -222,6 +231,7 @@ export default class GameScene extends Phaser.Scene {
           tile.type === 'empty' ? 0x2a2a2a : 0x16213e
         );
         rect.setStrokeStyle(2, 0x0f3460);
+        this.labyrinthContainer.add(rect);
 
         if (tile.type !== 'empty') {
           // Draw connections
@@ -232,41 +242,47 @@ export default class GameScene extends Phaser.Scene {
 
           // Mark start/end
           if (x === this.labyrinth.start.x && y === this.labyrinth.start.y) {
-            this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, 'START', {
+            const startText = this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, 'START', {
               fontSize: '12px',
               color: '#4ecca3'
             }).setOrigin(0.5);
+            this.labyrinthContainer.add(startText);
           }
           if (x === this.labyrinth.end.x && y === this.labyrinth.end.y) {
-            this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, 'END', {
+            const endText = this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, 'END', {
               fontSize: '12px',
               color: '#ff6b6b'
             }).setOrigin(0.5);
+            this.labyrinthContainer.add(endText);
           }
 
           // Mark puzzle tiles
           if (tile.type === 'puzzle') {
-            this.add.circle(
+            const puzzleCircle = this.add.circle(
               posX + this.tileSize / 2,
               posY + this.tileSize / 2,
               15,
               0xffcc00
             ).setAlpha(0.7);
-            this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, '?', {
+            this.labyrinthContainer.add(puzzleCircle);
+
+            const puzzleText = this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, '?', {
               fontSize: '20px',
               color: '#ffffff',
               fontStyle: 'bold'
             }).setOrigin(0.5);
+            this.labyrinthContainer.add(puzzleText);
           }
 
           // Mark intersection tiles
           if (tile.type === 'intersection') {
-            this.add.star(
+            const intersectionStar = this.add.star(
               posX + this.tileSize / 2,
               posY + this.tileSize / 2,
               4, 10, 20,
               0xff6b9d
             );
+            this.labyrinthContainer.add(intersectionStar);
           }
         }
       });
@@ -295,6 +311,7 @@ export default class GameScene extends Phaser.Scene {
         break;
     }
     line.setLineWidth(lineWidth);
+    this.labyrinthContainer.add(line);
   }
 
   updatePlayerPosition() {
@@ -422,22 +439,122 @@ export default class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Handle intersection tile - switch lineage
+   * Handle intersection tile - present mystery choices
    * @param {Object} pos - Tile position
    */
   handleIntersection(pos) {
+    // Generate random mystery choices
+    const choiceData = this.intersectionManager.generateIntersectionChoices();
+
+    // Get intersection story
     const story = this.storyManager.getNextStory('intersection');
+
     if (story) {
       this.scene.pause();
       this.scene.launch('StoryScene', {
         storyCard: story,
         nextScene: 'GameScene',
-        soundManager: this.soundManager
+        soundManager: this.soundManager,
+        choiceData: choiceData // Pass choices to StoryScene
       });
-
-      // Toggle lineage
-      const newLineage = this.gameState.currentLineage === 'A' ? 'B' : 'A';
-      this.storyManager.switchLineage(newLineage);
     }
+  }
+
+  /**
+   * Apply intersection choice effect
+   * @param {string} intersectionId - Unique intersection ID
+   * @param {Object} choice - The chosen option
+   */
+  applyIntersectionChoice(intersectionId, choice) {
+    // Apply effect and get feedback
+    const feedback = this.intersectionManager.applyChoiceEffect(choice, this);
+
+    // Record choice
+    this.gameState.recordIntersectionChoice(intersectionId, choice);
+
+    // Toggle lineage (keep existing behavior)
+    const newLineage = this.gameState.currentLineage === 'A' ? 'B' : 'A';
+    this.storyManager.switchLineage(newLineage);
+
+    // Show feedback overlay
+    if (feedback) {
+      this.showFeedbackMessage(feedback);
+    }
+  }
+
+  /**
+   * Show feedback message overlay
+   * @param {string} message - Feedback text to display
+   */
+  showFeedbackMessage(message) {
+    const { width, height } = this.cameras.main;
+
+    const feedbackBg = this.add.rectangle(width / 2, height / 2, 400, 100, 0x000000)
+      .setAlpha(0.9).setDepth(1000);
+
+    const feedbackText = this.add.text(width / 2, height / 2, message, {
+      fontSize: '18px',
+      color: '#4ecca3',
+      align: 'center',
+      wordWrap: { width: 360 }
+    }).setOrigin(0.5).setDepth(1001);
+
+    // Fade out after 3 seconds
+    this.time.delayedCall(3000, () => {
+      this.tweens.add({
+        targets: [feedbackBg, feedbackText],
+        alpha: 0,
+        duration: 500,
+        onComplete: () => {
+          feedbackBg.destroy();
+          feedbackText.destroy();
+        }
+      });
+    });
+  }
+
+  /**
+   * Regenerate labyrinth while preserving player progress
+   */
+  regenerateLabyrinth() {
+    // Store current state to preserve
+    const preservedState = {
+      score: this.gameState.score,
+      startTime: this.gameState.startTime,
+      hintsRemaining: this.gameState.hintsRemaining,
+      currentLineage: this.gameState.currentLineage,
+      solvedPuzzles: [...this.gameState.solvedPuzzles],
+      difficultyMultiplier: this.gameState.difficultyMultiplier,
+      storyTone: this.gameState.storyTone,
+      intersectionChoices: [...this.gameState.intersectionChoices]
+    };
+
+    // Clear existing labyrinth graphics
+    if (this.labyrinthContainer) {
+      this.labyrinthContainer.destroy();
+    }
+
+    // Destroy and recreate player sprite
+    if (this.player) {
+      this.player.destroy();
+    }
+
+    // Generate new labyrinth (includes guaranteePuzzleOnPath)
+    this.labyrinth = LabyrinthGenerator.generate(5, 5);
+
+    // Reset player to start
+    this.playerPos = { ...this.labyrinth.start };
+
+    // Restore preserved state
+    Object.assign(this.gameState, preservedState);
+    this.gameState.visitedTiles = [];
+    this.gameState.markTileVisited(this.playerPos.x, this.playerPos.y);
+
+    // Re-render labyrinth
+    this.renderLabyrinth();
+
+    // Re-render player
+    this.player = this.add.circle(0, 0, 20, 0xff6b6b);
+    this.updatePlayerPosition();
   }
 }

@@ -18,6 +18,11 @@ export default class GameState {
     this.currentLineage = 'A'; // Hero's Quest by default
     this.visitedTiles = [];
     this.solvedPuzzles = [];
+
+    // NEW: Intersection effect tracking
+    this.difficultyMultiplier = 1.0; // 1.0 = normal, <1.0 = easier, >1.0 = harder
+    this.storyTone = 'neutral'; // 'neutral', 'dark', or 'bright'
+    this.intersectionChoices = []; // Track choices: [{intersectionId, choiceId, effect}]
   }
 
   /**
@@ -88,5 +93,49 @@ export default class GameState {
    */
   switchLineage(lineage) {
     this.currentLineage = lineage;
+  }
+
+  /**
+   * Adjust difficulty multiplier (for intersection effects)
+   * @param {number} delta - Change in difficulty (-0.3 to +0.4)
+   */
+  adjustDifficulty(delta) {
+    this.difficultyMultiplier = Math.max(0.5, Math.min(2.0, this.difficultyMultiplier + delta));
+  }
+
+  /**
+   * Set story tone (for intersection effects)
+   * @param {string} tone - 'dark', 'bright', or 'neutral'
+   */
+  setStoryTone(tone) {
+    this.storyTone = tone;
+  }
+
+  /**
+   * Add hint (can exceed initial limit via intersection choices)
+   */
+  addHint() {
+    this.hintsRemaining++;
+  }
+
+  /**
+   * Remove hint (can go to zero)
+   */
+  removeHint() {
+    this.hintsRemaining = Math.max(0, this.hintsRemaining - 1);
+  }
+
+  /**
+   * Record intersection choice
+   * @param {string} intersectionId - Unique ID for this intersection
+   * @param {Object} choice - Choice object with id and effect
+   */
+  recordIntersectionChoice(intersectionId, choice) {
+    this.intersectionChoices.push({
+      intersectionId,
+      choiceId: choice.id,
+      effect: choice.effect,
+      timestamp: Date.now()
+    });
   }
 }
