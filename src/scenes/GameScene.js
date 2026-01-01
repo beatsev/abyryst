@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import LabyrinthGenerator from '../systems/Generator.js';
+import GameState from '../systems/GameState.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -7,16 +8,26 @@ export default class GameScene extends Phaser.Scene {
     this.labyrinth = null;
     this.playerPos = { x: 0, y: 0 };
     this.tileSize = 100;
+    this.gameState = new GameState();
   }
 
   create() {
     const { width, height } = this.cameras.main;
+
+    // Reset game state
+    this.gameState.reset();
+
+    // Launch UI overlay
+    this.scene.launch('UIOverlay', { gameState: this.gameState });
 
     // Generate 5x5 labyrinth
     this.labyrinth = LabyrinthGenerator.generate(5, 5);
 
     // Find start position
     this.playerPos = { ...this.labyrinth.start };
+
+    // Mark start tile as visited
+    this.gameState.markTileVisited(this.playerPos.x, this.playerPos.y);
 
     // Render labyrinth
     this.renderLabyrinth();
@@ -132,6 +143,10 @@ export default class GameScene extends Phaser.Scene {
     if (this.isValidMove(newPos)) {
       this.playerPos = newPos;
       this.updatePlayerPosition();
+
+      // Track visited tile
+      this.gameState.markTileVisited(newPos.x, newPos.y);
+
       this.checkWinCondition();
 
       // Movement cooldown

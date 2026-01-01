@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import MenuScene from './scenes/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
+import UIOverlay from './scenes/UIOverlay.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -19,7 +20,7 @@ const config = {
       debug: false
     }
   },
-  scene: [MenuScene, GameScene]
+  scene: [MenuScene, GameScene, UIOverlay]
 };
 
 const game = new Phaser.Game(config);
