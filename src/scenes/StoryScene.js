@@ -17,10 +17,16 @@ export default class StoryScene extends Phaser.Scene {
     this.storyCard = data.storyCard;
     this.nextScene = data.nextScene || 'GameScene';
     this.nextSceneData = data.nextSceneData || {};
+    this.soundManager = data.soundManager;
   }
 
   create() {
     const { width, height } = this.cameras.main;
+
+    // Play story sound
+    if (this.soundManager) {
+      this.soundManager.playStory();
+    }
 
     // Dim background overlay
     this.add.rectangle(0, 0, width, height, 0x000000)

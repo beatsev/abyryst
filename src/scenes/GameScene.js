@@ -3,6 +3,7 @@ import LabyrinthGenerator from '../systems/Generator.js';
 import GameState from '../systems/GameState.js';
 import StoryManager from '../systems/StoryManager.js';
 import PuzzleManager from '../systems/PuzzleManager.js';
+import SoundManager from '../systems/SoundManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -13,6 +14,7 @@ export default class GameScene extends Phaser.Scene {
     this.gameState = new GameState();
     this.storyManager = null;
     this.puzzleManager = null;
+    this.soundManager = null;
   }
 
   create() {
@@ -74,9 +76,10 @@ export default class GameScene extends Phaser.Scene {
     this.swipeStartY = 0;
     this.swipeMinDistance = 50;
 
-    // Initialize story and puzzle managers
+    // Initialize managers
     this.storyManager = new StoryManager(this.gameState);
     this.puzzleManager = new PuzzleManager(this.gameState);
+    this.soundManager = new SoundManager(this);
 
     // Show intro story
     const introStory = this.storyManager.getNextStory('start');
@@ -84,7 +87,8 @@ export default class GameScene extends Phaser.Scene {
       this.scene.pause();
       this.scene.launch('StoryScene', {
         storyCard: introStory,
-        nextScene: 'GameScene'
+        nextScene: 'GameScene',
+        soundManager: this.soundManager
       });
     }
   }
@@ -161,6 +165,9 @@ export default class GameScene extends Phaser.Scene {
     if (this.isValidMove(newPos)) {
       this.playerPos = newPos;
       this.updatePlayerPosition();
+
+      // Play movement sound
+      this.soundManager.playMove();
 
       // Track visited tile
       this.gameState.markTileVisited(newPos.x, newPos.y);
@@ -324,6 +331,9 @@ export default class GameScene extends Phaser.Scene {
 
   checkWinCondition() {
     if (this.playerPos.x === this.labyrinth.end.x && this.playerPos.y === this.labyrinth.end.y) {
+      // Play win sound
+      this.soundManager.playWin();
+
       // Show end story with final score
       const endStory = this.storyManager.getNextStory('end');
       if (endStory) {
@@ -333,7 +343,8 @@ export default class GameScene extends Phaser.Scene {
             ...endStory,
             text: endStory.text + `\n\nFinal Score: ${this.gameState.score}\nTime: ${this.gameState.formatTime()}`
           },
-          nextScene: 'MenuScene'
+          nextScene: 'MenuScene',
+          soundManager: this.soundManager
         });
 
         this.time.delayedCall(3000, () => {
@@ -374,6 +385,7 @@ export default class GameScene extends Phaser.Scene {
         this.scene.launch('StoryScene', {
           storyCard: story,
           nextScene: 'GameScene',
+          soundManager: this.soundManager,
           nextSceneData: {
             launchPuzzle: true,
             puzzleId: tile.puzzleId,
@@ -401,7 +413,8 @@ export default class GameScene extends Phaser.Scene {
       puzzleId: puzzleId,
       playerPos: pos,
       puzzleManager: this.puzzleManager,
-      gameState: this.gameState
+      gameState: this.gameState,
+      soundManager: this.soundManager
     });
   }
 
@@ -415,7 +428,8 @@ export default class GameScene extends Phaser.Scene {
       this.scene.pause();
       this.scene.launch('StoryScene', {
         storyCard: story,
-        nextScene: 'GameScene'
+        nextScene: 'GameScene',
+        soundManager: this.soundManager
       });
 
       // Toggle lineage

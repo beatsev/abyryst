@@ -14,6 +14,7 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     this.playerPos = data.playerPos;
     this.puzzleManager = data.puzzleManager;
     this.gameState = data.gameState;
+    this.soundManager = data.soundManager;
 
     this.currentHintIndex = 0;
     this.hintsShown = [];
@@ -187,6 +188,9 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
 
     const hint = this.puzzleManager.getHint(this.puzzleId, this.currentHintIndex);
     if (hint) {
+      // Play hint sound
+      this.soundManager.playHint();
+
       this.gameState.useHint();
       this.hintsShown.push(hint);
       this.currentHintIndex++;
@@ -215,6 +219,9 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const isCorrect = this.puzzleManager.validateAnswer(this.puzzleId, userAnswer);
 
     if (isCorrect) {
+      // Play solve sound
+      this.soundManager.playSolve();
+
       // Correct answer!
       this.feedbackText.setText('✓ Correct!').setColor('#4ecca3');
 
@@ -237,6 +244,9 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       // Return to game after short delay
       this.time.delayedCall(1500, () => this.returnToGame());
     } else {
+      // Play error sound
+      this.soundManager.playError();
+
       // Incorrect answer
       this.feedbackText.setText('✗ Incorrect. Try again!').setColor('#ff6b6b');
       this.inputElement.value = '';
