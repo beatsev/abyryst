@@ -175,9 +175,90 @@ Start → Intro Story → Player moves → Puzzle Tile → Puzzle Story → [Lau
 **Time Spent:** ~2 hours
 
 **Next Steps:**
-- [ ] Begin Phase 4: Puzzle System
-- [ ] Create puzzles.json with 6 riddles
-- [ ] Create PuzzleManager.js
+- [x] Begin Phase 4: Puzzle System
+- [x] Create puzzles.json with 6 riddles
+- [x] Create PuzzleManager.js
+
+---
+
+### 2026-01-01 - Phase 4: Puzzle System ✅
+
+**Completed Tasks:**
+1. ✅ Created puzzles.json with 6 riddle definitions
+2. ✅ Created PuzzleManager.js for puzzle validation logic
+3. ✅ Created RiddlePuzzleScene.js with mobile-optimized UI
+4. ✅ Integrated puzzle system into GameScene
+5. ✅ Registered RiddlePuzzleScene in main.js
+6. ✅ Enabled DOM support in Phaser config
+7. ✅ Committed and pushed Phase 4 to GitHub
+
+**Implementation Details:**
+- **puzzles.json** contains 6 riddles across 3 difficulty levels:
+  - 2 easy riddles (echo, footsteps)
+  - 2 medium riddles (map, river)
+  - 2 hard riddles (pencil lead, ton)
+  - Each riddle has: question, answer, 3 progressive hints, difficulty
+- **PuzzleManager** handles puzzle logic:
+  - getPuzzle(puzzleId) - retrieves puzzle data by ID
+  - validateAnswer() - case-insensitive answer matching
+  - getHint(puzzleId, hintIndex) - returns progressive hints
+  - useHint() - decrements global hint counter
+  - isSolved() - checks if puzzle already completed
+- **RiddlePuzzleScene** provides mobile-friendly puzzle UI:
+  - HTML `<input>` field for native mobile keyboard support
+  - Styled puzzle card with difficulty badge (color-coded)
+  - Hint button with counter (💡 × remaining)
+  - Submit button for answer validation
+  - Visual feedback (✓ Correct / ✗ Incorrect)
+  - Bonus scoring system: +20 points per unused hint
+  - Auto-return to GameScene after 1.5s on success
+  - Close button allows skipping puzzle
+  - Enter key support for keyboard users
+  - Proper DOM cleanup on scene shutdown
+- **GameScene Integration:**
+  - Imported and initialized PuzzleManager
+  - Updated launchPuzzle() to launch RiddlePuzzleScene
+  - Passes puzzleManager and gameState to puzzle scene
+  - Scene pause/resume workflow preserves game state
+- **Phaser Config Updates:**
+  - Added `dom: { createContainer: true }` to enable HTML elements
+  - Registered RiddlePuzzleScene in scene array
+
+**Puzzle Flow:**
+```
+Player enters puzzle tile → Story card appears → Continue →
+RiddlePuzzleScene launches → Player solves riddle →
++100 points (+bonus for unused hints) → Return to GameScene
+```
+
+**Scoring System:**
+- Base puzzle reward: 100 points
+- Hint bonus: +20 points per unused hint (max +60)
+- Example: Solve without hints = 160 points total
+- Using 1 hint = 140 points, using 2 hints = 120 points, using 3 hints = 100 points
+
+**Mobile UX:**
+- HTML input field triggers native mobile keyboard
+- Large touch targets for buttons
+- Automatic focus on input field
+- Enter key works for keyboard users
+- DOM element cleanup prevents memory leaks
+
+**Testing:**
+- Dev server reloaded successfully, no errors
+- All 6 riddles load correctly with hints
+- Answer validation works (case-insensitive)
+- Hint system decrements counter properly
+- Scoring includes base + bonus points
+- HTML input field works on mobile browsers
+- Scene transitions preserve game state
+
+**Time Spent:** ~2.5 hours
+
+**Next Steps:**
+- [ ] Begin Phase 5: Sound System
+- [ ] Add audio files for move, solve, error
+- [ ] Implement Phaser audio manager
 
 ---
 
