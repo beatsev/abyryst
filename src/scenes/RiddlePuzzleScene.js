@@ -43,55 +43,78 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     this.add.rectangle(width / 2, height / 2, cardWidth, cardHeight, 0x16213e)
       .setStrokeStyle(3, 0x4ecca3);
 
+    // Calculate card boundaries for relative layout
+    const cardTop = height / 2 - cardHeight / 2;
+    const cardBottom = height / 2 + cardHeight / 2;
+
+    // Layout spacing constants
+    const spacing = {
+      small: 15,
+      medium: 25,
+      large: 35
+    };
+
+    // Position elements with relative layout from top to bottom
+    let currentY = cardTop + 30;
+
     // Title
-    this.add.text(width / 2, height / 2 - cardHeight / 2 + 30, 'Riddle Puzzle', {
+    this.add.text(width / 2, currentY, 'Riddle Puzzle', {
       fontSize: '24px',
       color: '#4ecca3',
       fontStyle: 'bold'
     }).setOrigin(0.5);
+    currentY += 30 + spacing.small;
 
     // Difficulty badge
     const difficultyColor = puzzle.difficulty === 'easy' ? '#4ecca3' :
                            puzzle.difficulty === 'medium' ? '#ffcc00' : '#ff6b6b';
-    this.add.text(width / 2, height / 2 - cardHeight / 2 + 60, puzzle.difficulty.toUpperCase(), {
+    this.add.text(width / 2, currentY, puzzle.difficulty.toUpperCase(), {
       fontSize: '14px',
       color: difficultyColor,
       backgroundColor: '#0e1628',
       padding: { x: 10, y: 4 }
     }).setOrigin(0.5);
+    currentY += 20 + spacing.large;
 
-    // Question text (positioned higher for more space)
-    this.add.text(width / 2, height / 2 - 110, puzzle.question, {
+    // Question text (position relative to difficulty badge)
+    const questionText = this.add.text(width / 2, currentY, puzzle.question, {
       fontSize: '18px',
       color: '#ffffff',
       align: 'center',
       wordWrap: { width: cardWidth - 60 }
     }).setOrigin(0.5);
+    // Use actual text bounds to calculate next position
+    currentY += Math.max(questionText.height, 40) + spacing.large;
 
-    // Create HTML input field (positioned significantly lower to avoid blocking question)
-    const inputY = height / 2 + 20;
-    this.createInputField(width / 2, inputY, cardWidth - 100);
+    // Create HTML input field (positioned relative to question)
+    const inputHeight = 40;
+    this.createInputField(width / 2, currentY + inputHeight / 2, cardWidth - 100);
+    currentY += inputHeight + spacing.medium;
 
-    // Hint section
-    this.hintText = this.add.text(width / 2, height / 2 + 90, '', {
+    // Hint section (positioned relative to input, will expand when hints shown)
+    this.hintText = this.add.text(width / 2, currentY, '', {
       fontSize: '14px',
       color: '#ffcc00',
       align: 'center',
       wordWrap: { width: cardWidth - 80 },
       fontStyle: 'italic'
-    }).setOrigin(0.5);
+    }).setOrigin(0.5, 0); // Origin at top to expand downward
+    currentY += spacing.medium;
 
-    // Feedback text (for correct/incorrect messages)
-    this.feedbackText = this.add.text(width / 2, height / 2 + 130, '', {
+    // Feedback text (positioned relative to hints)
+    this.feedbackText = this.add.text(width / 2, currentY, '', {
       fontSize: '16px',
       color: '#ffffff',
       align: 'center',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
+    // Buttons positioned from bottom up (relative to card bottom)
+    const actionButtonY = cardBottom - 100;
+    const closeButtonY = cardBottom - 40;
+
     // Hint button
-    const hintBtnY = height / 2 + cardHeight / 2 - 100;
-    this.hintButton = this.add.text(width / 2 - 120, hintBtnY, `💡 Hint (${this.gameState.hintsRemaining})`, {
+    this.hintButton = this.add.text(width / 2 - 120, actionButtonY, `💡 Hint (${this.gameState.hintsRemaining})`, {
       fontSize: '18px',
       backgroundColor: '#ffcc00',
       color: '#000000',
@@ -107,8 +130,7 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     this.hintButton.on('pointerdown', () => this.showHint());
 
     // Submit button
-    const submitBtnY = height / 2 + cardHeight / 2 - 100;
-    this.submitButton = this.add.text(width / 2 + 120, submitBtnY, 'Submit', {
+    this.submitButton = this.add.text(width / 2 + 120, actionButtonY, 'Submit', {
       fontSize: '18px',
       backgroundColor: '#4ecca3',
       color: '#000000',
@@ -124,7 +146,7 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     this.submitButton.on('pointerdown', () => this.checkAnswer());
 
     // Close button (in case user wants to skip)
-    this.closeButton = this.add.text(width / 2, height / 2 + cardHeight / 2 - 40, 'Close (Skip)', {
+    this.closeButton = this.add.text(width / 2, closeButtonY, 'Close (Skip)', {
       fontSize: '14px',
       color: '#999999',
       padding: { x: 15, y: 5 }
