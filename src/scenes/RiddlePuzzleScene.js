@@ -47,11 +47,11 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const cardTop = height / 2 - cardHeight / 2;
     const cardBottom = height / 2 + cardHeight / 2;
 
-    // Layout spacing constants
+    // Layout spacing constants (increased for better mobile readability)
     const spacing = {
-      small: 15,
-      medium: 25,
-      large: 35
+      small: 20,
+      medium: 40,
+      large: 60
     };
 
     // Position elements with relative layout from top to bottom
