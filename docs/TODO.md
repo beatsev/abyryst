@@ -90,6 +90,12 @@
 - [x] Fix any bugs found
 
 ### Day 4 - Polish & Testing 📋
+- [ ] **CRITICAL: Guaranteed Puzzle Path** (Game Balance Fix)
+  - [ ] Implement pathfinding algorithm (BFS/DFS) to find critical path from start to end
+  - [ ] Validate critical path contains ≥1 puzzle tile after generation
+  - [ ] If no puzzle on path, reassign one path tile on critical path to puzzle type
+  - [ ] Add unit tests for path validation
+  - [ ] Update Generator.js with guaranteePuzzleOnPath() method
 - [ ] Add animations (player movement, tile reveals)
 - [ ] Improve visual design (colors, fonts)
 - [ ] Add difficulty selection

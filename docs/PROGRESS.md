@@ -391,7 +391,39 @@ Scoring:
 
 **Time Spent:** ~1.5 hours
 
-**Project Status:** ✅ **MVP COMPLETE**
+**Project Status:** ✅ **MVP COMPLETE** → 🟡 **Feature Gap Identified**
+
+---
+
+### 2026-01-01 - Feature Gap Identified: Guaranteed Puzzle Path 🟡
+
+**Issue Identified:**
+User feedback revealed a critical game balance issue: the current random puzzle tile assignment doesn't guarantee at least one puzzle on the critical path from start to end. Players could potentially navigate directly to the end without encountering any puzzles.
+
+**Documentation Updates:**
+1. ✅ Updated PRD.md (section 4.1 Mechanics):
+   - Added "Critical Path Guarantee" requirement
+   - Specified algorithm must validate ≥1 puzzle on shortest path
+   - Defined fallback: reassign path tile to puzzle if needed
+
+2. ✅ Updated TODO.md (Day 4 - Polish & Testing):
+   - Added CRITICAL task: "Guaranteed Puzzle Path"
+   - Subtasks:
+     - Implement pathfinding (BFS/DFS) for critical path
+     - Validate puzzle count on path
+     - Reassignment logic for path tiles
+     - Unit tests for validation
+     - Update Generator.js with guaranteePuzzleOnPath()
+
+**Implementation Plan:**
+- Algorithm approach: BFS from start to end to find shortest path
+- Check if any tiles on path have type="puzzle"
+- If count = 0, select random path tile on critical path and convert to puzzle
+- Ensures game balance: no "free wins"
+
+**Priority:** High - affects core gameplay loop
+**Status:** Documented, awaiting implementation
+**Time Estimate:** 2-3 hours
 
 ---
 

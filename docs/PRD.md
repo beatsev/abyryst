@@ -62,6 +62,10 @@ PWA (iOS/Android/Web/Desktop) with home-screen install, offline-first.
 
 #### Mechanics
 - Tiles auto-arrange via algorithm ensuring solvable paths
+- **Critical Path Guarantee**: At least one puzzle tile MUST be on the shortest path from start to end
+  - Ensures players cannot skip all puzzles to reach the goal
+  - Algorithm validates critical path contains ≥1 puzzle after generation
+  - If no puzzle on critical path, re-assign one path tile to puzzle type
 - Puzzle solution reveals arrow/icon directing next tile
 - Intersections: Choose Line A/B (affects story branch)
 
