@@ -1,0 +1,272 @@
+import Phaser from 'phaser';
+
+/**
+ * RiddlePuzzleScene
+ * Displays riddle puzzles with HTML input field for mobile-friendly text entry
+ */
+export default class RiddlePuzzleScene extends Phaser.Scene {
+  constructor() {
+    super({ key: 'RiddlePuzzleScene' });
+  }
+
+  init(data) {
+    this.puzzleId = data.puzzleId;
+    this.playerPos = data.playerPos;
+    this.puzzleManager = data.puzzleManager;
+    this.gameState = data.gameState;
+
+    this.currentHintIndex = 0;
+    this.hintsShown = [];
+  }
+
+  create() {
+    const { width, height } = this.cameras.main;
+
+    // Dim background overlay
+    this.add.rectangle(0, 0, width, height, 0x000000)
+      .setOrigin(0, 0)
+      .setAlpha(0.9)
+      .setInteractive();
+
+    // Get puzzle data
+    const puzzle = this.puzzleManager.getPuzzle(this.puzzleId);
+    if (!puzzle) {
+      console.error(`Puzzle not found: ${this.puzzleId}`);
+      this.returnToGame();
+      return;
+    }
+
+    // Puzzle card background
+    const cardWidth = Math.min(700, width - 40);
+    const cardHeight = Math.min(500, height - 100);
+    this.add.rectangle(width / 2, height / 2, cardWidth, cardHeight, 0x16213e)
+      .setStrokeStyle(3, 0x4ecca3);
+
+    // Title
+    this.add.text(width / 2, height / 2 - cardHeight / 2 + 30, 'Riddle Puzzle', {
+      fontSize: '24px',
+      color: '#4ecca3',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    // Difficulty badge
+    const difficultyColor = puzzle.difficulty === 'easy' ? '#4ecca3' :
+                           puzzle.difficulty === 'medium' ? '#ffcc00' : '#ff6b6b';
+    this.add.text(width / 2, height / 2 - cardHeight / 2 + 60, puzzle.difficulty.toUpperCase(), {
+      fontSize: '14px',
+      color: difficultyColor,
+      backgroundColor: '#0e1628',
+      padding: { x: 10, y: 4 }
+    }).setOrigin(0.5);
+
+    // Question text
+    this.add.text(width / 2, height / 2 - 90, puzzle.question, {
+      fontSize: '18px',
+      color: '#ffffff',
+      align: 'center',
+      wordWrap: { width: cardWidth - 60 }
+    }).setOrigin(0.5);
+
+    // Create HTML input field
+    const inputY = height / 2 + 10;
+    this.createInputField(width / 2, inputY, cardWidth - 100);
+
+    // Hint section
+    this.hintText = this.add.text(width / 2, height / 2 + 80, '', {
+      fontSize: '14px',
+      color: '#ffcc00',
+      align: 'center',
+      wordWrap: { width: cardWidth - 80 },
+      fontStyle: 'italic'
+    }).setOrigin(0.5);
+
+    // Feedback text (for correct/incorrect messages)
+    this.feedbackText = this.add.text(width / 2, height / 2 + 120, '', {
+      fontSize: '16px',
+      color: '#ffffff',
+      align: 'center',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    // Hint button
+    const hintBtnY = height / 2 + cardHeight / 2 - 100;
+    this.hintButton = this.add.text(width / 2 - 120, hintBtnY, `💡 Hint (${this.gameState.hintsRemaining})`, {
+      fontSize: '18px',
+      backgroundColor: '#ffcc00',
+      color: '#000000',
+      padding: { x: 20, y: 8 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    this.hintButton.on('pointerover', () => {
+      this.hintButton.setBackgroundColor('#ffdd44');
+    });
+    this.hintButton.on('pointerout', () => {
+      this.hintButton.setBackgroundColor('#ffcc00');
+    });
+    this.hintButton.on('pointerdown', () => this.showHint());
+
+    // Submit button
+    const submitBtnY = height / 2 + cardHeight / 2 - 100;
+    this.submitButton = this.add.text(width / 2 + 120, submitBtnY, 'Submit', {
+      fontSize: '18px',
+      backgroundColor: '#4ecca3',
+      color: '#000000',
+      padding: { x: 30, y: 8 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    this.submitButton.on('pointerover', () => {
+      this.submitButton.setBackgroundColor('#5eddbb');
+    });
+    this.submitButton.on('pointerout', () => {
+      this.submitButton.setBackgroundColor('#4ecca3');
+    });
+    this.submitButton.on('pointerdown', () => this.checkAnswer());
+
+    // Close button (in case user wants to skip)
+    this.closeButton = this.add.text(width / 2, height / 2 + cardHeight / 2 - 40, 'Close (Skip)', {
+      fontSize: '14px',
+      color: '#999999',
+      padding: { x: 15, y: 5 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    this.closeButton.on('pointerover', () => {
+      this.closeButton.setColor('#ffffff');
+    });
+    this.closeButton.on('pointerout', () => {
+      this.closeButton.setColor('#999999');
+    });
+    this.closeButton.on('pointerdown', () => this.returnToGame());
+
+    // Keyboard support: Enter to submit
+    this.input.keyboard.on('keydown-ENTER', () => this.checkAnswer());
+  }
+
+  /**
+   * Create HTML input field for mobile-friendly text entry
+   */
+  createInputField(x, y, width) {
+    const inputElement = document.createElement('input');
+    inputElement.type = 'text';
+    inputElement.placeholder = 'Type your answer...';
+    inputElement.style.position = 'absolute';
+    inputElement.style.left = `${x - width / 2}px`;
+    inputElement.style.top = `${y - 20}px`;
+    inputElement.style.width = `${width}px`;
+    inputElement.style.height = '40px';
+    inputElement.style.fontSize = '18px';
+    inputElement.style.padding = '8px';
+    inputElement.style.border = '2px solid #4ecca3';
+    inputElement.style.borderRadius = '4px';
+    inputElement.style.backgroundColor = '#0e1628';
+    inputElement.style.color = '#ffffff';
+    inputElement.style.textAlign = 'center';
+    inputElement.style.outline = 'none';
+    inputElement.style.zIndex = '1000';
+
+    // Add to DOM
+    this.game.canvas.parentElement.appendChild(inputElement);
+    this.inputElement = inputElement;
+
+    // Focus on input
+    setTimeout(() => inputElement.focus(), 100);
+  }
+
+  /**
+   * Show next hint
+   */
+  showHint() {
+    if (this.currentHintIndex >= 3) {
+      this.hintText.setText('No more hints available!');
+      return;
+    }
+
+    if (this.gameState.hintsRemaining <= 0) {
+      this.hintText.setText('No hints remaining! (Used all 3)');
+      return;
+    }
+
+    const hint = this.puzzleManager.getHint(this.puzzleId, this.currentHintIndex);
+    if (hint) {
+      this.gameState.useHint();
+      this.hintsShown.push(hint);
+      this.currentHintIndex++;
+
+      // Display all hints shown so far
+      const hintDisplay = this.hintsShown.map((h, i) => `💡 Hint ${i + 1}: ${h}`).join('\n');
+      this.hintText.setText(hintDisplay);
+
+      // Update hint button counter
+      this.hintButton.setText(`💡 Hint (${this.gameState.hintsRemaining})`);
+    }
+  }
+
+  /**
+   * Check user's answer
+   */
+  checkAnswer() {
+    if (!this.inputElement) return;
+
+    const userAnswer = this.inputElement.value;
+    if (!userAnswer || userAnswer.trim() === '') {
+      this.feedbackText.setText('Please enter an answer!').setColor('#ff6b6b');
+      return;
+    }
+
+    const isCorrect = this.puzzleManager.validateAnswer(this.puzzleId, userAnswer);
+
+    if (isCorrect) {
+      // Correct answer!
+      this.feedbackText.setText('✓ Correct!').setColor('#4ecca3');
+
+      // Award points
+      this.gameState.markPuzzleSolved(this.puzzleId);
+
+      // Add bonus points for unused hints on this puzzle
+      const hintsUsedOnThisPuzzle = this.currentHintIndex;
+      const hintBonus = (3 - hintsUsedOnThisPuzzle) * 20;
+      if (hintBonus > 0) {
+        this.gameState.addScore(hintBonus);
+        this.feedbackText.setText(`✓ Correct! +${hintBonus} hint bonus!`);
+      }
+
+      // Disable input and buttons
+      this.inputElement.disabled = true;
+      this.submitButton.setAlpha(0.5).disableInteractive();
+      this.hintButton.setAlpha(0.5).disableInteractive();
+
+      // Return to game after short delay
+      this.time.delayedCall(1500, () => this.returnToGame());
+    } else {
+      // Incorrect answer
+      this.feedbackText.setText('✗ Incorrect. Try again!').setColor('#ff6b6b');
+      this.inputElement.value = '';
+      this.inputElement.focus();
+    }
+  }
+
+  /**
+   * Return to GameScene
+   */
+  returnToGame() {
+    // Remove HTML input from DOM
+    if (this.inputElement && this.inputElement.parentElement) {
+      this.inputElement.parentElement.removeChild(this.inputElement);
+      this.inputElement = null;
+    }
+
+    // Remove keyboard listener
+    this.input.keyboard.off('keydown-ENTER');
+
+    // Stop this scene and resume GameScene
+    this.scene.stop();
+    this.scene.resume('GameScene');
+  }
+
+  shutdown() {
+    // Cleanup when scene is shut down
+    if (this.inputElement && this.inputElement.parentElement) {
+      this.inputElement.parentElement.removeChild(this.inputElement);
+      this.inputElement = null;
+    }
+  }
+}

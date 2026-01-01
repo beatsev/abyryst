@@ -1,0 +1,70 @@
+{
+  "riddles": [
+    {
+      "id": "riddle_1",
+      "question": "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
+      "answer": "echo",
+      "hints": [
+        "Think about sounds bouncing back",
+        "You might hear me in caves or canyons",
+        "I repeat what you say"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "riddle_2",
+      "question": "The more you take, the more you leave behind. What am I?",
+      "answer": "footsteps",
+      "hints": [
+        "Think about walking",
+        "Everyone leaves these when they move",
+        "You can see them in sand or snow"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "riddle_3",
+      "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+      "answer": "map",
+      "hints": [
+        "You use me for navigation",
+        "I'm a representation, not the real thing",
+        "I can fit in your pocket but show the whole world"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "riddle_4",
+      "question": "What can run but never walks, has a mouth but never talks, has a head but never weeps, has a bed but never sleeps?",
+      "answer": "river",
+      "hints": [
+        "Think about flowing water",
+        "I move constantly in one direction",
+        "Fish swim in me"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "riddle_5",
+      "question": "I am taken from a mine, and shut up in a wooden case, from which I am never released, and yet I am used by almost every person. What am I?",
+      "answer": "pencil lead",
+      "hints": [
+        "You use this for writing",
+        "It's made from graphite",
+        "It's surrounded by wood"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "riddle_6",
+      "question": "Forward I am heavy, but backward I am not. What am I?",
+      "answer": "ton",
+      "hints": [
+        "Think about wordplay",
+        "Reverse the letters",
+        "It's a unit of weight"
+      ],
+      "difficulty": "hard"
+    }
+  ]
+}

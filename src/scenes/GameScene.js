@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import LabyrinthGenerator from '../systems/Generator.js';
 import GameState from '../systems/GameState.js';
 import StoryManager from '../systems/StoryManager.js';
+import PuzzleManager from '../systems/PuzzleManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +12,7 @@ export default class GameScene extends Phaser.Scene {
     this.tileSize = 100;
     this.gameState = new GameState();
     this.storyManager = null;
+    this.puzzleManager = null;
   }
 
   create() {
@@ -72,8 +74,9 @@ export default class GameScene extends Phaser.Scene {
     this.swipeStartY = 0;
     this.swipeMinDistance = 50;
 
-    // Initialize story manager
+    // Initialize story and puzzle managers
     this.storyManager = new StoryManager(this.gameState);
+    this.puzzleManager = new PuzzleManager(this.gameState);
 
     // Show intro story
     const introStory = this.storyManager.getNextStory('start');
@@ -392,10 +395,14 @@ export default class GameScene extends Phaser.Scene {
    * @param {Object} pos - Player position
    */
   launchPuzzle(puzzleId, pos) {
-    // Placeholder for Phase 4 - will launch RiddlePuzzleScene
-    console.log(`Would launch puzzle: ${puzzleId} at position`, pos);
-    // For now, just mark as solved automatically
-    this.gameState.markPuzzleSolved(puzzleId);
+    // Launch RiddlePuzzleScene with puzzle data
+    this.scene.pause();
+    this.scene.launch('RiddlePuzzleScene', {
+      puzzleId: puzzleId,
+      playerPos: pos,
+      puzzleManager: this.puzzleManager,
+      gameState: this.gameState
+    });
   }
 
   /**

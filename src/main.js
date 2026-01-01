@@ -3,6 +3,7 @@ import MenuScene from './scenes/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
 import UIOverlay from './scenes/UIOverlay.js';
 import StoryScene from './scenes/StoryScene.js';
+import RiddlePuzzleScene from './scenes/RiddlePuzzleScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -14,6 +15,9 @@ const config = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
+  dom: {
+    createContainer: true
+  },
   physics: {
     default: 'arcade',
     arcade: {
@@ -21,7 +25,7 @@ const config = {
       debug: false
     }
   },
-  scene: [MenuScene, GameScene, UIOverlay, StoryScene]
+  scene: [MenuScene, GameScene, UIOverlay, StoryScene, RiddlePuzzleScene]
 };
 
 const game = new Phaser.Game(config);
