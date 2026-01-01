@@ -37,92 +37,79 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       return;
     }
 
-    // Puzzle card background (increased height for mobile, reduced margins)
+    // Puzzle card background - use almost full screen height on mobile
     const cardWidth = Math.min(700, width - 40);
-    const cardHeight = Math.min(600, height - 60); // Increased from 500 to 600, reduced margin
+    const cardHeight = Math.min(700, height - 40); // Maximize usable space
     this.add.rectangle(width / 2, height / 2, cardWidth, cardHeight, 0x16213e)
       .setStrokeStyle(3, 0x4ecca3);
 
-    // Calculate card boundaries for relative layout
+    // Calculate card boundaries
     const cardTop = height / 2 - cardHeight / 2;
     const cardBottom = height / 2 + cardHeight / 2;
 
-    // Layout spacing constants (optimized for mobile readability)
-    const spacing = {
-      small: 12,   // Between title and badge
-      medium: 30,  // Between input, hints, feedback
-      large: 45    // Between major sections (question and input)
+    // Define layout zones (percentages of card height for predictable layout)
+    const headerHeight = 80;  // Fixed height for title + badge
+    const buttonHeight = 140; // Fixed height for bottom buttons
+    const contentHeight = cardHeight - headerHeight - buttonHeight;
+
+    // Zone positions (guaranteed no overlap)
+    const zones = {
+      header: cardTop + 15,
+      questionTop: cardTop + headerHeight,
+      questionMax: cardTop + headerHeight + (contentHeight * 0.45), // Top 45% for question
+      input: cardTop + headerHeight + (contentHeight * 0.50),        // Input at 50% mark
+      feedback: cardTop + headerHeight + (contentHeight * 0.70),     // Feedback at 70% mark
+      buttons: cardBottom - buttonHeight
     };
 
-    // Position elements with relative layout from top to bottom
-    let currentY = cardTop + 20; // Reduced top padding from 30 to 20
-
-    // Title
-    this.add.text(width / 2, currentY, 'Riddle Puzzle', {
-      fontSize: '24px',
+    // HEADER ZONE: Title and difficulty badge
+    this.add.text(width / 2, zones.header, 'Riddle Puzzle', {
+      fontSize: '22px',
       color: '#4ecca3',
       fontStyle: 'bold'
     }).setOrigin(0.5);
-    currentY += 30 + spacing.small;
 
-    // Difficulty badge
     const difficultyColor = puzzle.difficulty === 'easy' ? '#4ecca3' :
                            puzzle.difficulty === 'medium' ? '#ffcc00' : '#ff6b6b';
-    this.add.text(width / 2, currentY, puzzle.difficulty.toUpperCase(), {
-      fontSize: '14px',
+    this.add.text(width / 2, zones.header + 30, puzzle.difficulty.toUpperCase(), {
+      fontSize: '13px',
       color: difficultyColor,
       backgroundColor: '#0e1628',
       padding: { x: 10, y: 4 }
     }).setOrigin(0.5);
-    currentY += 20 + spacing.large;
 
-    // Question text (position relative to difficulty badge)
-    const questionText = this.add.text(width / 2, currentY, puzzle.question, {
-      fontSize: '18px',
+    // QUESTION ZONE: Center question in available space
+    const questionCenterY = zones.questionTop + ((zones.input - zones.questionTop) / 2);
+    const questionText = this.add.text(width / 2, questionCenterY, puzzle.question, {
+      fontSize: '17px',
       color: '#ffffff',
       align: 'center',
-      wordWrap: { width: cardWidth - 60 }
+      wordWrap: { width: cardWidth - 80 }
     }).setOrigin(0.5);
 
-    // Force text update to get accurate bounds after word wrap
-    questionText.updateText();
-    const questionBounds = questionText.getBounds();
-    const questionHeight = questionBounds.height;
-
-    // Calculate position after question with spacing
-    currentY += questionHeight + spacing.large;
-
-    // Ensure input is positioned at a safe minimum Y to prevent overlap
-    // even with longest multi-line questions (accounts for 4-5 line questions)
-    const minimumInputY = cardTop + 180; // Guaranteed safe position
-    const inputY = Math.max(currentY, minimumInputY);
-
-    // Create HTML input field at safe position
+    // INPUT ZONE: Always at 50% mark - guaranteed not to overlap
     const inputHeight = 40;
-    this.createInputField(width / 2, inputY + inputHeight / 2, cardWidth - 100);
-    currentY = inputY + inputHeight + spacing.medium;
+    this.createInputField(width / 2, zones.input, cardWidth - 100);
 
-    // Hint section (positioned relative to input, will expand when hints shown)
-    this.hintText = this.add.text(width / 2, currentY, '', {
-      fontSize: '14px',
+    // FEEDBACK ZONE: Hints and feedback below input
+    this.hintText = this.add.text(width / 2, zones.feedback - 20, '', {
+      fontSize: '13px',
       color: '#ffcc00',
       align: 'center',
       wordWrap: { width: cardWidth - 80 },
       fontStyle: 'italic'
-    }).setOrigin(0.5, 0); // Origin at top to expand downward
-    currentY += spacing.medium;
+    }).setOrigin(0.5);
 
-    // Feedback text (positioned relative to hints)
-    this.feedbackText = this.add.text(width / 2, currentY, '', {
-      fontSize: '16px',
+    this.feedbackText = this.add.text(width / 2, zones.feedback + 10, '', {
+      fontSize: '15px',
       color: '#ffffff',
       align: 'center',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // Buttons positioned from bottom up (relative to card bottom)
-    const actionButtonY = cardBottom - 100;
-    const closeButtonY = cardBottom - 40;
+    // BUTTON ZONE: Fixed at bottom
+    const actionButtonY = zones.buttons + 40;
+    const closeButtonY = zones.buttons + 100;
 
     // Hint button
     this.hintButton = this.add.text(width / 2 - 120, actionButtonY, `💡 Hint (${this.gameState.hintsRemaining})`, {
