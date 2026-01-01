@@ -68,12 +68,12 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       wordWrap: { width: cardWidth - 60 }
     }).setOrigin(0.5);
 
-    // Create HTML input field
-    const inputY = height / 2 + 10;
+    // Create HTML input field (positioned lower to avoid blocking question)
+    const inputY = height / 2 + 50;
     this.createInputField(width / 2, inputY, cardWidth - 100);
 
     // Hint section
-    this.hintText = this.add.text(width / 2, height / 2 + 80, '', {
+    this.hintText = this.add.text(width / 2, height / 2 + 110, '', {
       fontSize: '14px',
       color: '#ffcc00',
       align: 'center',
@@ -82,7 +82,7 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Feedback text (for correct/incorrect messages)
-    this.feedbackText = this.add.text(width / 2, height / 2 + 120, '', {
+    this.feedbackText = this.add.text(width / 2, height / 2 + 150, '', {
       fontSize: '16px',
       color: '#ffffff',
       align: 'center',
