@@ -5,6 +5,7 @@ import StoryManager from '../systems/StoryManager.js';
 import PuzzleManager from '../systems/PuzzleManager.js';
 import SoundManager from '../systems/SoundManager.js';
 import IntersectionManager from '../systems/IntersectionManager.js';
+import CampaignManager from '../systems/CampaignManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -18,11 +19,29 @@ export default class GameScene extends Phaser.Scene {
     this.soundManager = null;
   }
 
-  create() {
+  create(data) {
     const { width, height } = this.cameras.main;
 
-    // Reset game state
-    this.gameState.reset();
+    // Initialize campaign manager
+    this.campaignManager = new CampaignManager();
+
+    // Check if resuming or starting new
+    if (data && data.resumeCampaign && data.saveData) {
+      this.resumeFromSave(data.saveData);
+    } else if (data && data.levelConfig) {
+      // Continuing from level summary
+      this.currentLevelConfig = data.levelConfig;
+      this.gameState = data.gameState;
+      this.campaignManager = data.campaignManager;
+    } else {
+      // Starting fresh campaign
+      this.gameState = new GameState();
+      this.gameState.reset();
+      this.gameState.currentLevel = 1;
+      this.gameState.livesRemaining = 3;
+      this.gameState.isCampaignMode = true;
+      this.currentLevelConfig = this.campaignManager.getLevelConfig(1);
+    }
 
     // Initialize managers
     this.storyManager = new StoryManager(this.gameState);
@@ -36,8 +55,15 @@ export default class GameScene extends Phaser.Scene {
       soundManager: this.soundManager
     });
 
-    // Generate 5x5 labyrinth
-    this.labyrinth = LabyrinthGenerator.generate(5, 5);
+    // Generate labyrinth with level-specific grid size
+    const { width: gridW, height: gridH } = this.currentLevelConfig.gridSize;
+    this.labyrinth = LabyrinthGenerator.generate(gridW, gridH);
+
+    // Reset hints to level config
+    this.gameState.hintsRemaining = this.currentLevelConfig.hintsAllowed;
+
+    // Calculate tile size for responsive grid
+    this.calculateTileSize();
 
     // Find start position
     this.playerPos = { ...this.labyrinth.start };
@@ -351,43 +377,57 @@ export default class GameScene extends Phaser.Scene {
 
   checkWinCondition() {
     if (this.playerPos.x === this.labyrinth.end.x && this.playerPos.y === this.labyrinth.end.y) {
-      // Play win sound
       this.soundManager.playWin();
 
-      // Show end story with final score
-      const endStory = this.storyManager.getNextStory('end');
-      if (endStory) {
-        this.scene.pause();
-        this.scene.launch('StoryScene', {
-          storyCard: {
-            ...endStory,
-            text: endStory.text + `\n\nFinal Score: ${this.gameState.score}\nTime: ${this.gameState.formatTime()}`
-          },
-          nextScene: 'MenuScene',
-          soundManager: this.soundManager
-        });
+      // Calculate level stats
+      const levelTime = this.gameState.getLevelElapsedTime();
+      this.gameState.levelStats.timeElapsed = levelTime;
+      this.gameState.levelStats.levelScore = this.gameState.score - this.gameState.campaignStats.totalScore;
 
-        this.time.delayedCall(3000, () => {
-          this.scene.stop('StoryScene');
-          this.scene.stop('UIOverlay');
-          this.scene.start('MenuScene');
-        });
+      // Update campaign stats
+      this.gameState.campaignStats.levelsCompleted++;
+      this.gameState.campaignStats.totalScore = this.gameState.score;
+      this.gameState.campaignStats.totalPuzzlesSolved += this.gameState.levelStats.puzzlesSolved;
+      this.gameState.campaignStats.totalPuzzlesFailed += this.gameState.levelStats.puzzlesFailed;
+      this.gameState.campaignStats.totalTime += levelTime;
+
+      if (this.gameState.currentLevel === 10) {
+        this.handleCampaignComplete();
       } else {
-        // Fallback if no end story
-        this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, 'YOU WIN!', {
-          fontSize: '48px',
-          fontFamily: 'Arial Black',
-          color: '#4ecca3',
-          backgroundColor: '#000000',
-          padding: { x: 20, y: 10 }
-        }).setOrigin(0.5).setDepth(1000);
-
-        this.time.delayedCall(2000, () => {
-          this.scene.stop('UIOverlay');
-          this.scene.start('MenuScene');
-        });
+        this.handleLevelComplete();
       }
     }
+  }
+
+  /**
+   * Handle level completion (levels 1-9)
+   */
+  handleLevelComplete() {
+    this.scene.pause();
+    this.scene.launch('LevelSummaryScene', {
+      gameState: this.gameState,
+      soundManager: this.soundManager,
+      campaignManager: this.campaignManager
+    });
+  }
+
+  /**
+   * Handle campaign completion (level 10)
+   */
+  handleCampaignComplete() {
+    this.scene.pause();
+
+    // Save high score
+    const currentScore = this.gameState.score;
+    const highScore = parseInt(localStorage.getItem('abyryst_high_score') || '0');
+    if (currentScore > highScore) {
+      localStorage.setItem('abyryst_high_score', currentScore.toString());
+    }
+
+    this.scene.launch('VictoryScene', {
+      gameState: this.gameState,
+      soundManager: this.soundManager
+    });
   }
 
   /**
@@ -539,8 +579,9 @@ export default class GameScene extends Phaser.Scene {
       this.player.destroy();
     }
 
-    // Generate new labyrinth (includes guaranteePuzzleOnPath)
-    this.labyrinth = LabyrinthGenerator.generate(5, 5);
+    // Generate new labyrinth with current level's grid size
+    const { width: gridW, height: gridH } = this.currentLevelConfig.gridSize;
+    this.labyrinth = LabyrinthGenerator.generate(gridW, gridH);
 
     // Reset player to start
     this.playerPos = { ...this.labyrinth.start };
@@ -556,5 +597,47 @@ export default class GameScene extends Phaser.Scene {
     // Re-render player
     this.player = this.add.circle(0, 0, 20, 0xff6b6b);
     this.updatePlayerPosition();
+  }
+
+  /**
+   * Resume campaign from saved data
+   * @param {Object} saveData - Saved campaign data
+   */
+  resumeFromSave(saveData) {
+    this.gameState = new GameState();
+    this.gameState.currentLevel = saveData.currentLevel;
+    this.gameState.livesRemaining = saveData.livesRemaining;
+    this.gameState.campaignStats = saveData.campaignStats;
+    this.gameState.score = saveData.campaignStats.totalScore;
+    this.gameState.isCampaignMode = true;
+
+    this.currentLevelConfig = this.campaignManager.getLevelConfig(saveData.currentLevel);
+  }
+
+  /**
+   * Calculate tile size for responsive grid
+   */
+  calculateTileSize() {
+    const { width, height } = this.cameras.main;
+    const { width: gridW, height: gridH } = this.currentLevelConfig.gridSize;
+
+    const maxTileSizeX = (width - 100) / gridW;
+    const maxTileSizeY = (height - 200) / gridH;
+
+    this.tileSize = Math.min(100, maxTileSizeX, maxTileSizeY);
+  }
+
+  /**
+   * Save campaign progress to localStorage
+   */
+  saveProgress() {
+    const saveData = {
+      currentLevel: this.gameState.currentLevel,
+      livesRemaining: this.gameState.livesRemaining,
+      campaignStats: this.gameState.campaignStats,
+      timestamp: Date.now()
+    };
+
+    localStorage.setItem('abyryst_campaign_save', JSON.stringify(saveData));
   }
 }

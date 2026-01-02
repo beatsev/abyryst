@@ -23,6 +23,26 @@ export default class GameState {
     this.difficultyMultiplier = 1.0; // 1.0 = normal, <1.0 = easier, >1.0 = harder
     this.storyTone = 'neutral'; // 'neutral', 'dark', or 'bright'
     this.intersectionChoices = []; // Track choices: [{intersectionId, choiceId, effect}]
+
+    // Campaign mode tracking
+    this.currentLevel = 1;
+    this.livesRemaining = 3;
+    this.levelStartTime = Date.now();
+    this.levelStats = {
+      puzzlesSolved: 0,
+      puzzlesFailed: 0,
+      timeElapsed: 0,
+      hintsUsed: 0,
+      levelScore: 0
+    };
+    this.campaignStats = {
+      totalScore: 0,
+      levelsCompleted: 0,
+      totalPuzzlesSolved: 0,
+      totalPuzzlesFailed: 0,
+      totalTime: 0
+    };
+    this.isCampaignMode = true;
   }
 
   /**
@@ -137,5 +157,79 @@ export default class GameState {
       effect: choice.effect,
       timestamp: Date.now()
     });
+  }
+
+  /**
+   * Decrement life on puzzle failure
+   * @returns {boolean} True if game over (lives = 0)
+   */
+  loseLife() {
+    this.livesRemaining = Math.max(0, this.livesRemaining - 1);
+    this.levelStats.puzzlesFailed++;
+    return this.livesRemaining === 0;
+  }
+
+  /**
+   * Record successful puzzle solve for level stats
+   */
+  recordPuzzleSuccess() {
+    this.levelStats.puzzlesSolved++;
+  }
+
+  /**
+   * Advance to next level
+   */
+  advanceLevel() {
+    this.currentLevel++;
+    this.levelStartTime = Date.now();
+    this.levelStats = {
+      puzzlesSolved: 0,
+      puzzlesFailed: 0,
+      timeElapsed: 0,
+      hintsUsed: 0,
+      levelScore: 0
+    };
+  }
+
+  /**
+   * Calculate level completion grade (S/A/B/C/D)
+   * @returns {string} Grade letter
+   */
+  calculateGrade() {
+    const { puzzlesFailed, hintsUsed, timeElapsed } = this.levelStats;
+
+    // Perfect: All puzzles, no fails, no hints, fast time
+    if (puzzlesFailed === 0 && hintsUsed === 0 && timeElapsed < 600) return 'S';
+
+    // Great: Few fails, minimal hints
+    if (puzzlesFailed <= 1 && hintsUsed <= 2) return 'A';
+
+    // Good: Some mistakes
+    if (puzzlesFailed <= 3 && hintsUsed <= 5) return 'B';
+
+    // Okay: Many mistakes
+    if (puzzlesFailed <= 5) return 'C';
+
+    // Poor: Struggling
+    return 'D';
+  }
+
+  /**
+   * Get elapsed time for current level only
+   * @returns {number} Elapsed seconds
+   */
+  getLevelElapsedTime() {
+    return Math.floor((Date.now() - this.levelStartTime) / 1000);
+  }
+
+  /**
+   * Format level time as MM:SS
+   * @returns {string} Formatted time string
+   */
+  formatLevelTime() {
+    const seconds = this.getLevelElapsedTime();
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 }

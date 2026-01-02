@@ -261,6 +261,9 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       // Award points
       this.gameState.markPuzzleSolved(this.puzzleId);
 
+      // Track puzzle success for campaign stats
+      this.gameState.recordPuzzleSuccess();
+
       // Add bonus points for unused hints on this puzzle
       const hintsUsedOnThisPuzzle = this.currentHintIndex;
       const hintBonus = (3 - hintsUsedOnThisPuzzle) * 20;
@@ -280,10 +283,23 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       // Play error sound
       this.soundManager.playError();
 
-      // Incorrect answer
-      this.feedbackText.setText('✗ Incorrect. Try again!').setColor('#ff6b6b');
-      this.inputElement.value = '';
-      this.inputElement.focus();
+      // Lose a life on wrong answer
+      const isGameOver = this.gameState.loseLife();
+
+      if (isGameOver) {
+        this.feedbackText.setText('✗ Incorrect. No lives remaining!').setColor('#ff6b6b');
+        this.inputElement.disabled = true;
+        this.submitButton.setAlpha(0.5).disableInteractive();
+        this.hintButton.setAlpha(0.5).disableInteractive();
+
+        this.time.delayedCall(2000, () => this.triggerGameOver());
+      } else {
+        this.feedbackText.setText(
+          `✗ Incorrect. Lives: ${this.gameState.livesRemaining}/3`
+        ).setColor('#ff6b6b');
+        this.inputElement.value = '';
+        this.inputElement.focus();
+      }
     }
   }
 
@@ -303,6 +319,32 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     // Stop this scene and resume GameScene
     this.scene.stop();
     this.scene.resume('GameScene');
+  }
+
+  /**
+   * Trigger game over when lives reach 0
+   */
+  triggerGameOver() {
+    // Remove HTML input from DOM
+    if (this.inputElement && this.inputElement.parentElement) {
+      this.inputElement.parentElement.removeChild(this.inputElement);
+      this.inputElement = null;
+    }
+
+    // Remove keyboard listener
+    this.input.keyboard.off('keydown-ENTER');
+
+    // Stop this scene
+    this.scene.stop();
+
+    // Launch GameOverScene
+    this.scene.launch('GameOverScene', {
+      gameState: this.gameState,
+      soundManager: this.soundManager
+    });
+
+    // Stop GameScene
+    this.scene.stop('GameScene');
   }
 
   shutdown() {

@@ -1,0 +1,84 @@
+{
+  "levels": [
+    {
+      "level": 1,
+      "gridSize": { "width": 5, "height": 5 },
+      "puzzleCount": 6,
+      "difficultyMultiplier": 0.7,
+      "hintsAllowed": 3,
+      "description": "The Entrance Hall"
+    },
+    {
+      "level": 2,
+      "gridSize": { "width": 5, "height": 5 },
+      "puzzleCount": 7,
+      "difficultyMultiplier": 0.8,
+      "hintsAllowed": 3,
+      "description": "The Twisted Corridor"
+    },
+    {
+      "level": 3,
+      "gridSize": { "width": 6, "height": 6 },
+      "puzzleCount": 8,
+      "difficultyMultiplier": 0.9,
+      "hintsAllowed": 3,
+      "description": "The Branching Paths"
+    },
+    {
+      "level": 4,
+      "gridSize": { "width": 6, "height": 6 },
+      "puzzleCount": 9,
+      "difficultyMultiplier": 1.0,
+      "hintsAllowed": 2,
+      "description": "The Shadow Chamber"
+    },
+    {
+      "level": 5,
+      "gridSize": { "width": 7, "height": 7 },
+      "puzzleCount": 10,
+      "difficultyMultiplier": 1.1,
+      "hintsAllowed": 2,
+      "description": "The Echoing Depths"
+    },
+    {
+      "level": 6,
+      "gridSize": { "width": 7, "height": 7 },
+      "puzzleCount": 11,
+      "difficultyMultiplier": 1.2,
+      "hintsAllowed": 2,
+      "description": "The Trial of Wisdom"
+    },
+    {
+      "level": 7,
+      "gridSize": { "width": 8, "height": 8 },
+      "puzzleCount": 12,
+      "difficultyMultiplier": 1.3,
+      "hintsAllowed": 2,
+      "description": "The Abyss Gate"
+    },
+    {
+      "level": 8,
+      "gridSize": { "width": 9, "height": 9 },
+      "puzzleCount": 13,
+      "difficultyMultiplier": 1.4,
+      "hintsAllowed": 1,
+      "description": "The Nightmare Maze"
+    },
+    {
+      "level": 9,
+      "gridSize": { "width": 10, "height": 10 },
+      "puzzleCount": 14,
+      "difficultyMultiplier": 1.5,
+      "hintsAllowed": 1,
+      "description": "The Final Approach"
+    },
+    {
+      "level": 10,
+      "gridSize": { "width": 10, "height": 10 },
+      "puzzleCount": 15,
+      "difficultyMultiplier": 1.6,
+      "hintsAllowed": 1,
+      "description": "The Heart of the Labyrinth"
+    }
+  ]
+}

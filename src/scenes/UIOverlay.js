@@ -49,6 +49,20 @@ export default class UIOverlay extends Phaser.Scene {
       color: '#ffcc00'
     }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0);
 
+    // Level indicator (left side, below score)
+    this.levelText = this.add.text(10, 35, 'Level: 1/10', {
+      fontSize: '14px',
+      color: '#ffcc00',
+      fontFamily: 'Arial',
+      fontStyle: 'bold'
+    }).setDepth(1001).setScrollFactor(0);
+
+    // Lives indicator (right side, below hints)
+    this.livesText = this.add.text(width - 50, 35, '❤️×3', {
+      fontSize: '14px',
+      color: '#ff6b6b'
+    }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0);
+
     // Sound toggle button (far right)
     this.soundButton = this.add.text(width - 10, 15, '🔊', {
       fontSize: '18px',
@@ -91,8 +105,13 @@ export default class UIOverlay extends Phaser.Scene {
     if (!this.gameState) return;
 
     this.scoreText.setText(`Score: ${this.gameState.score}`);
-    this.timerText.setText(this.gameState.formatTime());
+    this.timerText.setText(this.gameState.formatLevelTime());
     this.hintsText.setText(`💡×${this.gameState.hintsRemaining}`);
+
+    if (this.gameState.isCampaignMode) {
+      this.levelText.setText(`Level: ${this.gameState.currentLevel}/10`);
+      this.livesText.setText(`❤️×${this.gameState.livesRemaining}`);
+    }
   }
 
   /**
