@@ -12,22 +12,29 @@ export default class MenuScene extends Phaser.Scene {
     const titleX = width / 2;
     const titleY = height / 3;
 
+    // Store base positions for shadows (anchored positions)
+    this.shadowBasePositions = {
+      shadow1: { x: titleX + 4, y: titleY + 4 },
+      shadow2: { x: titleX + 3, y: titleY + 3 },
+      shadow3: { x: titleX + 2, y: titleY + 2 }
+    };
+
     // Create shadow layers for 3D depth
-    this.titleShadow1 = this.add.text(titleX + 4, titleY + 4, 'ABYRYST', {
+    this.titleShadow1 = this.add.text(this.shadowBasePositions.shadow1.x, this.shadowBasePositions.shadow1.y, 'ABYRYST', {
       fontSize: '64px',
       fontFamily: 'Arial Black',
       color: '#000000',
       alpha: 0.4
     }).setOrigin(0.5);
 
-    this.titleShadow2 = this.add.text(titleX + 3, titleY + 3, 'ABYRYST', {
+    this.titleShadow2 = this.add.text(this.shadowBasePositions.shadow2.x, this.shadowBasePositions.shadow2.y, 'ABYRYST', {
       fontSize: '64px',
       fontFamily: 'Arial Black',
       color: '#1a1a1a',
       alpha: 0.5
     }).setOrigin(0.5);
 
-    this.titleShadow3 = this.add.text(titleX + 2, titleY + 2, 'ABYRYST', {
+    this.titleShadow3 = this.add.text(this.shadowBasePositions.shadow3.x, this.shadowBasePositions.shadow3.y, 'ABYRYST', {
       fontSize: '64px',
       fontFamily: 'Arial Black',
       color: '#2a2a2a',
@@ -184,11 +191,11 @@ export default class MenuScene extends Phaser.Scene {
       const offsetY = Phaser.Math.Between(-1, 2);
       const duration = Phaser.Math.Between(80, 200);
 
-      // Move shadows to simulate torch movement
+      // Move shadows relative to base positions (prevents drift)
       this.tweens.add({
         targets: this.titleShadow1,
-        x: this.titleShadow1.x + offsetX * 1.5,
-        y: this.titleShadow1.y + offsetY * 1.5,
+        x: this.shadowBasePositions.shadow1.x + offsetX * 1.5,
+        y: this.shadowBasePositions.shadow1.y + offsetY * 1.5,
         alpha: Phaser.Math.FloatBetween(0.3, 0.5),
         duration: duration,
         ease: 'Sine.easeInOut'
@@ -196,8 +203,8 @@ export default class MenuScene extends Phaser.Scene {
 
       this.tweens.add({
         targets: this.titleShadow2,
-        x: this.titleShadow2.x + offsetX,
-        y: this.titleShadow2.y + offsetY,
+        x: this.shadowBasePositions.shadow2.x + offsetX,
+        y: this.shadowBasePositions.shadow2.y + offsetY,
         alpha: Phaser.Math.FloatBetween(0.4, 0.6),
         duration: duration,
         ease: 'Sine.easeInOut'
@@ -205,8 +212,8 @@ export default class MenuScene extends Phaser.Scene {
 
       this.tweens.add({
         targets: this.titleShadow3,
-        x: this.titleShadow3.x + offsetX * 0.5,
-        y: this.titleShadow3.y + offsetY * 0.5,
+        x: this.shadowBasePositions.shadow3.x + offsetX * 0.5,
+        y: this.shadowBasePositions.shadow3.y + offsetY * 0.5,
         alpha: Phaser.Math.FloatBetween(0.5, 0.7),
         duration: duration,
         ease: 'Sine.easeInOut',
