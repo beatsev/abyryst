@@ -47,20 +47,20 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const cardTop = height / 2 - cardHeight / 2;
     const cardBottom = height / 2 + cardHeight / 2;
 
-    // Define layout zones (input moved to bottom for better mobile UX)
-    const headerHeight = 80;  // Fixed height for title + badge
-    const inputHeight = 45;   // Space for input field above buttons
-    const buttonHeight = 140; // Fixed height for bottom buttons
+    // Define layout zones (input directly above buttons)
+    const headerHeight = 80;   // Fixed height for title + badge
+    const buttonHeight = 140;  // Fixed height for bottom buttons (hint + submit + close)
+    const inputHeight = 50;    // Space for input field directly above buttons
     const contentHeight = cardHeight - headerHeight - inputHeight - buttonHeight;
 
-    // Zone positions (question → hints → input → buttons)
+    // Zone positions (question → hints → feedback → input → buttons)
     const zones = {
       header: cardTop + 15,
       questionTop: cardTop + headerHeight,
-      question: cardTop + headerHeight + (contentHeight * 0.30),     // Question in top 30%
-      hints: cardTop + headerHeight + (contentHeight * 0.60),        // Hints in middle (plenty of space)
+      question: cardTop + headerHeight + (contentHeight * 0.25),     // Question in top 25%
+      hints: cardTop + headerHeight + (contentHeight * 0.55),        // Hints in middle with more space
       feedback: cardTop + headerHeight + (contentHeight * 0.80),     // Feedback below hints
-      input: cardBottom - buttonHeight - inputHeight,                 // Input at bottom above buttons
+      input: cardBottom - buttonHeight - inputHeight + 10,            // Input directly above buttons
       buttons: cardBottom - buttonHeight
     };
 
