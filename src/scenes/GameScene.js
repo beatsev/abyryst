@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import LabyrinthGenerator from '../systems/Generator.js';
 import GameState from '../systems/GameState.js';
+import TileGraphics from '../systems/TileGraphics.js';
 import StoryManager from '../systems/StoryManager.js';
 import PuzzleManager from '../systems/PuzzleManager.js';
 import SoundManager from '../systems/SoundManager.js';
@@ -21,6 +22,9 @@ export default class GameScene extends Phaser.Scene {
 
   create(data) {
     const { width, height } = this.cameras.main;
+
+    // Generate procedural tile textures
+    TileGraphics.generate(this);
 
     // Initialize campaign manager
     this.campaignManager = new CampaignManager();
@@ -75,7 +79,8 @@ export default class GameScene extends Phaser.Scene {
     this.renderLabyrinth();
 
     // Render player
-    this.player = this.add.circle(0, 0, 20, 0xff6b6b);
+    this.player = this.add.image(0, 0, 'player-sprite');
+    this.player.setTint(0xff6b6b);
     this.updatePlayerPosition();
 
     // UI - Menu button (top-left)
@@ -248,96 +253,68 @@ export default class GameScene extends Phaser.Scene {
         const posX = offsetX + x * this.tileSize;
         const posY = offsetY + y * this.tileSize;
 
-        // Draw tile
-        const rect = this.add.rectangle(
+        let textureKey = 'tile-empty';
+        if (tile.type !== 'empty') {
+          // Calculate bitmask for connections
+          let mask = 0;
+          if (tile.connections.N) mask += 1;
+          if (tile.connections.E) mask += 2;
+          if (tile.connections.S) mask += 4;
+          if (tile.connections.W) mask += 8;
+          textureKey = `tile-${mask}`;
+        }
+
+        // Create tile sprite
+        const sprite = this.add.image(
           posX + this.tileSize / 2,
           posY + this.tileSize / 2,
-          this.tileSize - 4,
-          this.tileSize - 4,
-          tile.type === 'empty' ? 0x2a2a2a : 0x16213e
+          textureKey
         );
-        rect.setStrokeStyle(2, 0x0f3460);
-        this.labyrinthContainer.add(rect);
+        sprite.setDisplaySize(this.tileSize, this.tileSize);
+        this.labyrinthContainer.add(sprite);
 
         if (tile.type !== 'empty') {
-          // Draw connections
-          if (tile.connections.N) this.drawConnection(posX, posY, 'N');
-          if (tile.connections.S) this.drawConnection(posX, posY, 'S');
-          if (tile.connections.E) this.drawConnection(posX, posY, 'E');
-          if (tile.connections.W) this.drawConnection(posX, posY, 'W');
-
           // Mark start/end
           if (x === this.labyrinth.start.x && y === this.labyrinth.start.y) {
-            const startText = this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, 'START', {
-              fontSize: '12px',
-              color: '#4ecca3'
-            }).setOrigin(0.5);
-            this.labyrinthContainer.add(startText);
+            const startMarker = this.add.image(
+              posX + this.tileSize / 2,
+              posY + this.tileSize / 2,
+              'marker-start'
+            ).setDisplaySize(this.tileSize, this.tileSize);
+            this.labyrinthContainer.add(startMarker);
           }
+          
           if (x === this.labyrinth.end.x && y === this.labyrinth.end.y) {
-            const endText = this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, 'END', {
-              fontSize: '12px',
-              color: '#ff6b6b'
-            }).setOrigin(0.5);
-            this.labyrinthContainer.add(endText);
+            const endMarker = this.add.image(
+              posX + this.tileSize / 2,
+              posY + this.tileSize / 2,
+              'marker-end'
+            ).setDisplaySize(this.tileSize, this.tileSize);
+            this.labyrinthContainer.add(endMarker);
           }
 
           // Mark puzzle tiles
           if (tile.type === 'puzzle') {
-            const puzzleCircle = this.add.circle(
+            const puzzleMarker = this.add.image(
               posX + this.tileSize / 2,
               posY + this.tileSize / 2,
-              15,
-              0xffcc00
-            ).setAlpha(0.7);
-            this.labyrinthContainer.add(puzzleCircle);
-
-            const puzzleText = this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, '?', {
-              fontSize: '20px',
-              color: '#ffffff',
-              fontStyle: 'bold'
-            }).setOrigin(0.5);
-            this.labyrinthContainer.add(puzzleText);
+              'marker-puzzle'
+            ).setDisplaySize(this.tileSize * 0.6, this.tileSize * 0.6);
+            this.labyrinthContainer.add(puzzleMarker);
           }
 
           // Mark intersection tiles
           if (tile.type === 'intersection') {
-            const intersectionStar = this.add.star(
+            const intersectionMarker = this.add.image(
               posX + this.tileSize / 2,
               posY + this.tileSize / 2,
-              4, 10, 20,
-              0xff6b9d
-            );
-            this.labyrinthContainer.add(intersectionStar);
+              'marker-intersection'
+            ).setDisplaySize(this.tileSize * 0.6, this.tileSize * 0.6);
+            this.labyrinthContainer.add(intersectionMarker);
           }
         }
       });
     });
-  }
-
-  drawConnection(x, y, direction) {
-    const centerX = x + this.tileSize / 2;
-    const centerY = y + this.tileSize / 2;
-    const lineWidth = 3;
-    const lineColor = 0x4ecca3;
-
-    let line;
-    switch (direction) {
-      case 'N':
-        line = this.add.line(0, 0, centerX, centerY, centerX, y, lineColor);
-        break;
-      case 'S':
-        line = this.add.line(0, 0, centerX, centerY, centerX, y + this.tileSize, lineColor);
-        break;
-      case 'E':
-        line = this.add.line(0, 0, centerX, centerY, x + this.tileSize, centerY, lineColor);
-        break;
-      case 'W':
-        line = this.add.line(0, 0, centerX, centerY, x, centerY, lineColor);
-        break;
-    }
-    line.setLineWidth(lineWidth);
-    this.labyrinthContainer.add(line);
   }
 
   updatePlayerPosition() {
@@ -595,7 +572,8 @@ export default class GameScene extends Phaser.Scene {
     this.renderLabyrinth();
 
     // Re-render player
-    this.player = this.add.circle(0, 0, 20, 0xff6b6b);
+    this.player = this.add.image(0, 0, 'player-sprite');
+    this.player.setTint(0xff6b6b);
     this.updatePlayerPosition();
   }
 
