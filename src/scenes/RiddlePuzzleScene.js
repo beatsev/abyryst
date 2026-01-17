@@ -170,6 +170,10 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const inputElement = document.createElement('input');
     inputElement.type = 'text';
     inputElement.placeholder = 'Type your answer...';
+    inputElement.autocomplete = 'off';
+    inputElement.autocorrect = 'off';
+    inputElement.autocapitalize = 'off';
+    inputElement.spellcheck = false;
     inputElement.style.position = 'absolute';
 
     // Get canvas position and scale to properly position input

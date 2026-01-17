@@ -20,11 +20,16 @@ export default class GameScene extends Phaser.Scene {
     this.soundManager = null;
   }
 
+  preload() {
+    // Generate procedural tile textures before the scene starts
+    TileGraphics.generate(this);
+  }
+
   create(data) {
     const { width, height } = this.cameras.main;
 
-    // Generate procedural tile textures
-    TileGraphics.generate(this);
+    // Generate procedural tile textures (ensure textures are available)
+    // (Removed duplicate generation; now handled in preload)
 
     // Initialize campaign manager
     this.campaignManager = new CampaignManager();
