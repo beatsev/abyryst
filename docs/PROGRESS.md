@@ -1073,5 +1073,48 @@ Lives = 0: GameOverScene → Show stats
 
 ---
 
-**Last Updated:** 2026-01-01 23:59
-**Next Update:** After Day 2 completion
+### 2026-01-17 - Bug Fix: Input Field Space Support ✅
+
+**Completed Tasks:**
+1. ✅ Fixed riddle input field to properly support spaces
+2. ✅ Moved tile graphics generation to preload phase in GameScene
+3. ✅ Deployed fix to production
+
+**Issue Identified:**
+Multi-word riddle answers (e.g., "pencil lead") were not accepting space characters on mobile browsers. Mobile keyboard autocorrect and autocomplete features were interfering with input.
+
+**Implementation Details:**
+- **RiddlePuzzleScene.js Input Field Enhancement:**
+  - Added `autocomplete="off"` to prevent browser autocomplete interference
+  - Added `autocorrect="off"` to disable mobile autocorrect
+  - Added `autocapitalize="off"` to prevent auto-capitalization
+  - Added `spellcheck="false"` to disable spellcheck underlines
+  - These attributes ensure clean text input without browser interference
+
+- **GameScene.js Optimization:**
+  - Moved `TileGraphics.generate()` from `create()` to `preload()` method
+  - Ensures textures are loaded before scene rendering
+  - Prevents potential race conditions
+
+**Affected Riddles:**
+- riddle_5: "pencil lead" (2 words)
+- Future multi-word answers now supported
+
+**Testing:**
+- Build succeeded
+- Input field now accepts spaces correctly
+- Mobile keyboard behavior normalized
+
+**Metrics:**
+- **Files Modified:** 2
+- **Lines Changed:** +11, -2
+- **Time Spent:** ~15 minutes
+
+**Commit:** `690e2d2` - "Fix input field to allow spaces in riddle answers"
+
+**Project Status:** ✅ **Bug Fixed** → 🟢 **Deployed to Production**
+
+---
+
+**Last Updated:** 2026-01-17
+**Next Update:** After next development session
