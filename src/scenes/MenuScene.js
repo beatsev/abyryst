@@ -7,130 +7,139 @@ export default class MenuScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.cameras.main;
+    const compact = width < 520;
+    const centerX = width / 2;
 
-    // Title with 3D flickering torch shadow effect
-    const titleX = width / 2;
-    const titleY = height / 3;
+    this.createBackground(width, height);
 
-    // Store base positions for shadows (anchored positions)
-    this.shadowBasePositions = {
-      shadow1: { x: titleX + 4, y: titleY + 4 },
-      shadow2: { x: titleX + 3, y: titleY + 3 },
-      shadow3: { x: titleX + 2, y: titleY + 2 }
-    };
+    const titleY = compact ? height * 0.16 : height * 0.2;
+    this.createTitle(centerX, titleY, compact);
 
-    // Create shadow layers for 3D depth
-    this.titleShadow1 = this.add.text(this.shadowBasePositions.shadow1.x, this.shadowBasePositions.shadow1.y, 'ABYRYST', {
-      fontSize: '64px',
+    this.add.text(centerX, titleY + (compact ? 62 : 76), 'LABYRINTH MYSTERY', {
+      fontSize: compact ? '14px' : '18px',
       fontFamily: 'Arial Black',
-      color: '#000000',
-      alpha: 0.4
+      color: '#62e5bf'
     }).setOrigin(0.5);
 
-    this.titleShadow2 = this.add.text(this.shadowBasePositions.shadow2.x, this.shadowBasePositions.shadow2.y, 'ABYRYST', {
-      fontSize: '64px',
-      fontFamily: 'Arial Black',
-      color: '#1a1a1a',
-      alpha: 0.5
-    }).setOrigin(0.5);
-
-    this.titleShadow3 = this.add.text(this.shadowBasePositions.shadow3.x, this.shadowBasePositions.shadow3.y, 'ABYRYST', {
-      fontSize: '64px',
-      fontFamily: 'Arial Black',
-      color: '#2a2a2a',
-      alpha: 0.6
-    }).setOrigin(0.5);
-
-    // Main title
-    this.add.text(titleX, titleY, 'ABYRYST', {
-      fontSize: '64px',
-      fontFamily: 'Arial Black',
-      color: '#ffffff',
-      stroke: '#4ecca3',
-      strokeThickness: 2
-    }).setOrigin(0.5);
-
-    // Create flickering torch shadow animation
-    this.createTorchFlickerEffect();
-
-    // Subtitle
-    this.add.text(width / 2, height / 2 - 80, 'Labyrinth Mystery', {
-      fontSize: '24px',
-      fontFamily: 'Arial',
-      color: '#aaaaaa'
-    }).setOrigin(0.5);
-
-    // Check for saved campaign
     const saveData = this.loadSaveData();
+    const panelWidth = Math.min(width - 32, 480);
+    const panelHeight = saveData ? 236 : 178;
+    const panelY = Math.min(height * 0.56, titleY + 240);
+
+    this.add.rectangle(centerX + 4, panelY + 7, panelWidth, panelHeight, 0x000000, 0.34);
+    this.add.rectangle(centerX, panelY, panelWidth, panelHeight, 0x0b1020, 0.88)
+      .setStrokeStyle(2, 0x62e5bf, 0.24);
 
     if (saveData) {
-      // Continue Campaign button
-      const continueBtn = this.add.text(width / 2, height / 2 + 20, 'Continue Campaign', {
-        fontSize: '28px',
-        backgroundColor: '#4ecca3',
-        padding: { x: 20, y: 10 }
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-      continueBtn.on('pointerover', () => continueBtn.setScale(1.05));
-      continueBtn.on('pointerout', () => continueBtn.setScale(1.0));
-      continueBtn.on('pointerdown', () => this.continueCampaign(saveData));
-
-      // Show save info
-      this.add.text(width / 2, height / 2 + 60,
-        `Level ${saveData.currentLevel} | Lives: ${saveData.livesRemaining}`, {
+      this.createButton(centerX, panelY - 64, panelWidth - 48, 54, 'CONTINUE CAMPAIGN', 0x62e5bf, 0x07110e, () => this.continueCampaign(saveData));
+      this.add.text(centerX, panelY - 18, `Level ${saveData.currentLevel}   HP ${saveData.livesRemaining}`, {
         fontSize: '14px',
-        color: '#999999'
+        fontFamily: 'Arial Black',
+        color: '#ffcf5a'
       }).setOrigin(0.5);
-
-      // New Campaign button
-      const newBtn = this.add.text(width / 2, height / 2 + 100, 'New Campaign', {
-        fontSize: '20px',
-        backgroundColor: '#16213e',
-        padding: { x: 15, y: 8 }
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-      newBtn.on('pointerover', () => newBtn.setScale(1.05));
-      newBtn.on('pointerout', () => newBtn.setScale(1.0));
-      newBtn.on('pointerdown', () => this.startNewCampaign());
+      this.createButton(centerX, panelY + 46, panelWidth - 48, 50, 'NEW CAMPAIGN', 0x17233a, 0xf5fffb, () => this.startNewCampaign());
     } else {
-      // Start Campaign button
-      const startBtn = this.add.text(width / 2, height / 2 + 40, 'Start Campaign', {
-        fontSize: '32px',
-        backgroundColor: '#16213e',
-        padding: { x: 20, y: 10 }
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-      startBtn.on('pointerover', () => startBtn.setScale(1.05));
-      startBtn.on('pointerout', () => startBtn.setScale(1.0));
-      startBtn.on('pointerdown', () => this.startNewCampaign());
+      this.createButton(centerX, panelY - 24, panelWidth - 48, 58, 'START CAMPAIGN', 0x62e5bf, 0x07110e, () => this.startNewCampaign());
     }
 
-    // High Score display
     const highScore = parseInt(localStorage.getItem('abyryst_high_score') || '0');
     if (highScore > 0) {
-      this.add.text(width / 2, height - 120, `High Score: ${highScore}`, {
-        fontSize: '18px',
-        color: '#FFD700'
+      this.add.text(centerX, panelY + panelHeight / 2 - 42, `HIGH SCORE ${highScore}`, {
+        fontSize: '14px',
+        fontFamily: 'Arial Black',
+        color: '#ffcf5a'
       }).setOrigin(0.5);
     }
 
-    // Instructions
-    this.add.text(width / 2, height - 80, 'Navigate the labyrinth and solve puzzles\nto uncover the mystery', {
-      fontSize: '16px',
+    this.add.text(centerX, Math.min(height - 74, panelY + panelHeight / 2 + 64), 'Explore shifting corridors. Solve riddles. Survive ten depths.', {
+      fontSize: compact ? '14px' : '15px',
       fontFamily: 'Arial',
-      color: '#888888',
-      align: 'center'
+      color: '#a8b7c7',
+      align: 'center',
+      wordWrap: { width: Math.min(width - 48, 500) }
     }).setOrigin(0.5);
 
-    // Version
-    this.add.text(10, height - 20, 'v2.0.0 - Campaign Mode', {
+    this.add.text(16, height - 22, 'v2.0.0', {
       fontSize: '12px',
-      color: '#666666'
+      color: '#58677a',
+      fontFamily: 'Arial Black'
     }).setOrigin(0, 1);
   }
 
+  createBackground(width, height) {
+    this.add.rectangle(0, 0, width, height, 0x070a12).setOrigin(0);
+
+    const g = this.add.graphics();
+    g.fillGradientStyle(0x132942, 0x132942, 0x070a12, 0x070a12, 0.95);
+    g.fillRect(0, 0, width, height);
+    g.fillStyle(0x62e5bf, 0.06);
+    g.fillCircle(width * 0.18, height * 0.18, Math.max(100, width * 0.28));
+    g.fillStyle(0xffc857, 0.045);
+    g.fillCircle(width * 0.84, height * 0.28, Math.max(90, width * 0.22));
+
+    g.lineStyle(1, 0x62e5bf, 0.08);
+    const step = Math.max(34, Math.min(54, width / 9));
+    for (let x = -step; x < width + step; x += step) {
+      g.lineBetween(x, 0, x + height * 0.28, height);
+    }
+    for (let y = 0; y < height; y += step) {
+      g.lineBetween(0, y, width, y + width * 0.12);
+    }
+  }
+
+  createTitle(x, y, compact) {
+    const fontSize = compact ? '52px' : '72px';
+    const offsets = [
+      { x: 5, y: 6, color: '#000000', alpha: 0.45 },
+      { x: 3, y: 3, color: '#14233a', alpha: 0.78 }
+    ];
+
+    offsets.forEach((shadow) => {
+      this.add.text(x + shadow.x, y + shadow.y, 'ABYRYST', {
+        fontSize,
+        fontFamily: 'Arial Black',
+        color: shadow.color
+      }).setOrigin(0.5).setAlpha(shadow.alpha);
+    });
+
+    const title = this.add.text(x, y, 'ABYRYST', {
+      fontSize,
+      fontFamily: 'Arial Black',
+      color: '#ffffff',
+      stroke: '#62e5bf',
+      strokeThickness: 2
+    }).setOrigin(0.5);
+
+    this.tweens.add({
+      targets: title,
+      alpha: 0.86,
+      duration: 1200,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+  }
+
+  createButton(x, y, width, height, label, fill, color, onClick) {
+    const button = this.add.container(x, y).setSize(width, height);
+    const bg = this.add.rectangle(0, 0, width, height, fill, 1)
+      .setStrokeStyle(2, 0xffffff, 0.18);
+    const text = this.add.text(0, 0, label, {
+      fontSize: width < 360 ? '16px' : '18px',
+      fontFamily: 'Arial Black',
+      color: Phaser.Display.Color.IntegerToColor(color).rgba
+    }).setOrigin(0.5);
+
+    button.add([bg, text]);
+    button.setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains);
+    button.on('pointerover', () => bg.setAlpha(0.86));
+    button.on('pointerout', () => bg.setAlpha(1));
+    button.on('pointerdown', onClick);
+    return button;
+  }
+
   /**
-   * Load saved campaign data from localStorage
+   * Load saved campaign data from localStorage.
    * @returns {Object|null} Save data or null if invalid/missing
    */
   loadSaveData() {
@@ -139,8 +148,6 @@ export default class MenuScene extends Phaser.Scene {
       if (!saveJson) return null;
 
       const data = JSON.parse(saveJson);
-
-      // Validate save isn't too old (30 days)
       const ageMs = Date.now() - data.timestamp;
       if (ageMs > 30 * 24 * 60 * 60 * 1000) {
         localStorage.removeItem('abyryst_campaign_save');
@@ -153,10 +160,6 @@ export default class MenuScene extends Phaser.Scene {
     }
   }
 
-  /**
-   * Continue saved campaign
-   * @param {Object} saveData - Saved campaign data
-   */
   continueCampaign(saveData) {
     this.scene.start('GameScene', {
       resumeCampaign: true,
@@ -164,9 +167,6 @@ export default class MenuScene extends Phaser.Scene {
     });
   }
 
-  /**
-   * Start new campaign (with confirmation if save exists)
-   */
   startNewCampaign() {
     if (this.loadSaveData()) {
       const confirmed = confirm('This will delete your saved progress. Continue?');
@@ -177,56 +177,5 @@ export default class MenuScene extends Phaser.Scene {
     this.scene.start('GameScene', {
       resumeCampaign: false
     });
-  }
-
-  /**
-   * Create flickering torch shadow effect
-   * Simulates a torch casting moving shadows on the title
-   */
-  createTorchFlickerEffect() {
-    // Random flicker pattern for torch
-    const flicker = () => {
-      // Random offset for torch position
-      const offsetX = Phaser.Math.Between(-2, 3);
-      const offsetY = Phaser.Math.Between(-1, 2);
-      const duration = Phaser.Math.Between(80, 200);
-
-      // Move shadows relative to base positions (prevents drift)
-      this.tweens.add({
-        targets: this.titleShadow1,
-        x: this.shadowBasePositions.shadow1.x + offsetX * 1.5,
-        y: this.shadowBasePositions.shadow1.y + offsetY * 1.5,
-        alpha: Phaser.Math.FloatBetween(0.3, 0.5),
-        duration: duration,
-        ease: 'Sine.easeInOut'
-      });
-
-      this.tweens.add({
-        targets: this.titleShadow2,
-        x: this.shadowBasePositions.shadow2.x + offsetX,
-        y: this.shadowBasePositions.shadow2.y + offsetY,
-        alpha: Phaser.Math.FloatBetween(0.4, 0.6),
-        duration: duration,
-        ease: 'Sine.easeInOut'
-      });
-
-      this.tweens.add({
-        targets: this.titleShadow3,
-        x: this.shadowBasePositions.shadow3.x + offsetX * 0.5,
-        y: this.shadowBasePositions.shadow3.y + offsetY * 0.5,
-        alpha: Phaser.Math.FloatBetween(0.5, 0.7),
-        duration: duration,
-        ease: 'Sine.easeInOut',
-        onComplete: () => {
-          // Continue flickering
-          if (this.scene.isActive()) {
-            flicker();
-          }
-        }
-      });
-    };
-
-    // Start the flicker effect
-    flicker();
   }
 }

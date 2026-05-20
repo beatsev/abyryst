@@ -38,10 +38,11 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     }
 
     // Puzzle card background - use almost full screen height on mobile
-    const cardWidth = Math.min(700, width - 40);
-    const cardHeight = Math.min(700, height - 40); // Maximize usable space
-    this.add.rectangle(width / 2, height / 2, cardWidth, cardHeight, 0x16213e)
-      .setStrokeStyle(3, 0x4ecca3);
+    const cardWidth = Math.min(700, width - 28);
+    const cardHeight = Math.min(700, height - 28);
+    this.add.rectangle(width / 2 + 4, height / 2 + 8, cardWidth, cardHeight, 0x000000, 0.38);
+    this.add.rectangle(width / 2, height / 2, cardWidth, cardHeight, 0x0b1020, 0.97)
+      .setStrokeStyle(2, 0x62e5bf, 0.32);
 
     // Calculate card boundaries
     const cardTop = height / 2 - cardHeight / 2;
@@ -67,7 +68,7 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     // HEADER ZONE: Title and difficulty badge
     this.add.text(width / 2, zones.header, 'Riddle Puzzle', {
       fontSize: '22px',
-      color: '#4ecca3',
+      color: '#62e5bf',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
@@ -82,10 +83,10 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
 
     // QUESTION ZONE: Question at top of content area
     const questionText = this.add.text(width / 2, zones.question, puzzle.question, {
-      fontSize: '17px',
-      color: '#ffffff',
+      fontSize: width < 430 ? '15px' : '17px',
+      color: '#eef6ff',
       align: 'center',
-      wordWrap: { width: cardWidth - 80 }
+      wordWrap: { width: cardWidth - 54 }
     }).setOrigin(0.5);
 
     // HINTS ZONE: Clear space in middle for hints (won't be blocked by input)
@@ -111,36 +112,37 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     // BUTTON ZONE: Fixed at bottom
     const actionButtonY = zones.buttons + 40;
     const closeButtonY = zones.buttons + 100;
+    const buttonOffset = Math.min(120, cardWidth * 0.24);
 
     // Hint button
-    this.hintButton = this.add.text(width / 2 - 120, actionButtonY, `💡 Hint (${this.gameState.hintsRemaining})`, {
+    this.hintButton = this.add.text(width / 2 - buttonOffset, actionButtonY, `Hint (${this.gameState.hintsRemaining})`, {
       fontSize: '18px',
-      backgroundColor: '#ffcc00',
+      backgroundColor: '#ffcf5a',
       color: '#000000',
       padding: { x: 20, y: 8 }
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     this.hintButton.on('pointerover', () => {
-      this.hintButton.setBackgroundColor('#ffdd44');
+      this.hintButton.setBackgroundColor('#ffe083');
     });
     this.hintButton.on('pointerout', () => {
-      this.hintButton.setBackgroundColor('#ffcc00');
+      this.hintButton.setBackgroundColor('#ffcf5a');
     });
     this.hintButton.on('pointerdown', () => this.showHint());
 
     // Submit button
-    this.submitButton = this.add.text(width / 2 + 120, actionButtonY, 'Submit', {
+    this.submitButton = this.add.text(width / 2 + buttonOffset, actionButtonY, 'Submit', {
       fontSize: '18px',
-      backgroundColor: '#4ecca3',
+      backgroundColor: '#62e5bf',
       color: '#000000',
       padding: { x: 30, y: 8 }
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     this.submitButton.on('pointerover', () => {
-      this.submitButton.setBackgroundColor('#5eddbb');
+      this.submitButton.setBackgroundColor('#85f0d2');
     });
     this.submitButton.on('pointerout', () => {
-      this.submitButton.setBackgroundColor('#4ecca3');
+      this.submitButton.setBackgroundColor('#62e5bf');
     });
     this.submitButton.on('pointerdown', () => this.checkAnswer());
 
@@ -188,14 +190,14 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
     const scaledWidth = width * scaleX;
 
     inputElement.style.left = `${scaledX - (scaledWidth / 2)}px`;
-    inputElement.style.top = `${scaledY - 16}px`;
+    inputElement.style.top = `${scaledY - 21}px`;
     inputElement.style.width = `${scaledWidth}px`;
-    inputElement.style.height = '32px';
-    inputElement.style.fontSize = '15px';
-    inputElement.style.padding = '6px';
-    inputElement.style.border = '2px solid #4ecca3';
-    inputElement.style.borderRadius = '4px';
-    inputElement.style.backgroundColor = '#0e1628';
+    inputElement.style.height = '42px';
+    inputElement.style.fontSize = '16px';
+    inputElement.style.padding = '9px 12px';
+    inputElement.style.border = '2px solid #62e5bf';
+    inputElement.style.borderRadius = '6px';
+    inputElement.style.backgroundColor = '#07101d';
     inputElement.style.color = '#ffffff';
     inputElement.style.textAlign = 'center';
     inputElement.style.outline = 'none';
@@ -233,11 +235,11 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       this.currentHintIndex++;
 
       // Display all hints shown so far
-      const hintDisplay = this.hintsShown.map((h, i) => `💡 Hint ${i + 1}: ${h}`).join('\n');
+      const hintDisplay = this.hintsShown.map((h, i) => `Hint ${i + 1}: ${h}`).join('\n');
       this.hintText.setText(hintDisplay);
 
       // Update hint button counter
-      this.hintButton.setText(`💡 Hint (${this.gameState.hintsRemaining})`);
+      this.hintButton.setText(`Hint (${this.gameState.hintsRemaining})`);
     }
   }
 

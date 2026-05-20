@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 /**
  * Story Scene
- * Displays story cards as modal overlays
+ * Displays story cards as modal overlays.
  */
 export default class StoryScene extends Phaser.Scene {
   constructor() {
@@ -10,7 +10,7 @@ export default class StoryScene extends Phaser.Scene {
   }
 
   /**
-   * Initialize with story card and navigation data
+   * Initialize with story card and navigation data.
    * @param {Object} data - Init data
    */
   init(data) {
@@ -18,139 +18,87 @@ export default class StoryScene extends Phaser.Scene {
     this.nextScene = data.nextScene || 'GameScene';
     this.nextSceneData = data.nextSceneData || {};
     this.soundManager = data.soundManager;
-
-    // NEW: Support intersection choices
     this.choiceData = data.choiceData || null;
     this.isChoiceMode = this.choiceData !== null;
   }
 
   create() {
     const { width, height } = this.cameras.main;
+    const compact = width < 500;
 
-    // Play story sound
     if (this.soundManager) {
       this.soundManager.playStory();
     }
 
-    // Dim background overlay
     this.add.rectangle(0, 0, width, height, 0x000000)
       .setOrigin(0, 0)
-      .setAlpha(0.8)
-      .setInteractive(); // Block input to scenes below
+      .setAlpha(0.78)
+      .setInteractive();
 
-    // Story card panel
-    const cardWidth = Math.min(600, width - 40);
-    const cardHeight = 300;
+    const cardWidth = Math.min(width - 28, 620);
+    const cardHeight = Math.min(height - 64, this.isChoiceMode ? 420 : 340);
     const cardX = width / 2;
     const cardY = height / 2;
+    const top = cardY - cardHeight / 2;
 
-    // Card background with border
-    this.add.rectangle(cardX, cardY, cardWidth, cardHeight, 0x16213e)
-      .setStrokeStyle(3, 0x4ecca3);
+    this.add.rectangle(cardX + 4, cardY + 8, cardWidth, cardHeight, 0x000000, 0.38);
+    this.add.rectangle(cardX, cardY, cardWidth, cardHeight, 0x0b1020, 0.96)
+      .setStrokeStyle(2, 0x62e5bf, 0.32);
+    this.add.rectangle(cardX, top + 28, cardWidth, 56, 0x17233a, 0.82);
 
-    // Decorative top bar
-    this.add.rectangle(cardX, cardY - cardHeight / 2 + 15, cardWidth, 30, 0x0f3460);
+    this.add.text(cardX, top + 18, this.isChoiceMode ? 'THE CROSSING' : 'THE LABYRINTH SPEAKS', {
+      fontSize: compact ? '15px' : '17px',
+      fontFamily: 'Arial Black',
+      color: '#62e5bf'
+    }).setOrigin(0.5, 0);
 
-    // Story text
-    this.add.text(cardX, cardY - 30, this.storyCard.text, {
-      fontSize: '18px',
-      color: '#ffffff',
+    this.add.text(cardX, top + (this.isChoiceMode ? 104 : 122), this.storyCard.text, {
+      fontSize: compact ? '17px' : '18px',
+      color: '#eef6ff',
       fontFamily: 'Arial',
       align: 'center',
-      wordWrap: { width: cardWidth - 60 }
+      lineSpacing: 7,
+      wordWrap: { width: cardWidth - 48 }
     }).setOrigin(0.5);
 
-    // Render buttons based on mode
     if (!this.isChoiceMode) {
-      // Normal mode: Single continue button
-      const continueBtn = this.add.text(cardX, cardY + 90, 'Continue', {
-        fontSize: '24px',
-        color: '#ffffff',
-        backgroundColor: '#4ecca3',
-        padding: { x: 30, y: 10 }
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-      // Button hover effects
-      continueBtn.on('pointerover', () => {
-        continueBtn.setStyle({ backgroundColor: '#6effe3', color: '#000000' });
-      });
-
-      continueBtn.on('pointerout', () => {
-        continueBtn.setStyle({ backgroundColor: '#4ecca3', color: '#ffffff' });
-      });
-
-      // Button click handler
-      continueBtn.on('pointerdown', () => {
-        this.handleContinue();
-      });
-
-      // Also allow Enter/Space key to continue
+      this.createButton(cardX, top + cardHeight - 66, cardWidth - 56, 54, 'CONTINUE', 0x62e5bf, 0x07110e, () => this.handleContinue());
       this.input.keyboard.once('keydown-ENTER', () => this.handleContinue());
       this.input.keyboard.once('keydown-SPACE', () => this.handleContinue());
-    } else {
-      // Choice mode: Two cryptic choice buttons
-      const choice1 = this.choiceData.choices[0];
-      const choice2 = this.choiceData.choices[1];
-
-      // Choice 1 button (top, green theme)
-      const choice1Btn = this.add.text(cardX, cardY + 50, choice1.cryptic, {
-        fontSize: '16px',
-        color: '#ffffff',
-        backgroundColor: '#4ecca3',
-        padding: { x: 20, y: 15 },
-        align: 'center',
-        wordWrap: { width: cardWidth - 100 }
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-      // Choice 2 button (bottom, pink theme)
-      const choice2Btn = this.add.text(cardX, cardY + 120, choice2.cryptic, {
-        fontSize: '16px',
-        color: '#ffffff',
-        backgroundColor: '#ff6b9d',
-        padding: { x: 20, y: 15 },
-        align: 'center',
-        wordWrap: { width: cardWidth - 100 }
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-      // Button hover effects for choice 1
-      choice1Btn.on('pointerover', () => {
-        choice1Btn.setStyle({ backgroundColor: '#6effe3', color: '#000000' });
-      });
-
-      choice1Btn.on('pointerout', () => {
-        choice1Btn.setStyle({ backgroundColor: '#4ecca3', color: '#ffffff' });
-      });
-
-      // Button hover effects for choice 2
-      choice2Btn.on('pointerover', () => {
-        choice2Btn.setStyle({ backgroundColor: '#ff9dbf', color: '#000000' });
-      });
-
-      choice2Btn.on('pointerout', () => {
-        choice2Btn.setStyle({ backgroundColor: '#ff6b9d', color: '#ffffff' });
-      });
-
-      // Button click handlers
-      choice1Btn.on('pointerdown', () => {
-        this.handleChoice(choice1);
-      });
-
-      choice2Btn.on('pointerdown', () => {
-        this.handleChoice(choice2);
-      });
+      return;
     }
+
+    const [choice1, choice2] = this.choiceData.choices;
+    const buttonWidth = cardWidth - 48;
+    this.createButton(cardX, top + cardHeight - 142, buttonWidth, 58, choice1.cryptic, 0x1f8f7d, 0xffffff, () => this.handleChoice(choice1), compact);
+    this.createButton(cardX, top + cardHeight - 72, buttonWidth, 58, choice2.cryptic, 0x7c4fb0, 0xffffff, () => this.handleChoice(choice2), compact);
   }
 
-  /**
-   * Handle continue button click
-   */
+  createButton(x, y, width, height, label, fill, color, onClick, compact = false) {
+    const button = this.add.container(x, y).setSize(width, height);
+    const bg = this.add.rectangle(0, 0, width, height, fill, 1)
+      .setStrokeStyle(2, 0xffffff, 0.18);
+    const text = this.add.text(0, 0, label, {
+      fontSize: compact ? '14px' : '16px',
+      color: Phaser.Display.Color.IntegerToColor(color).rgba,
+      fontFamily: 'Arial Black',
+      align: 'center',
+      wordWrap: { width: width - 30 }
+    }).setOrigin(0.5);
+
+    button.add([bg, text]);
+    button.setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains);
+    button.on('pointerover', () => bg.setAlpha(0.86));
+    button.on('pointerout', () => bg.setAlpha(1));
+    button.on('pointerdown', onClick);
+    return button;
+  }
+
   handleContinue() {
     this.scene.stop();
     this.scene.resume(this.nextScene);
 
-    // If there's data to pass back (like launching a puzzle)
     if (this.nextSceneData.launchPuzzle) {
-      // GameScene will handle launching the puzzle
       const gameScene = this.scene.get('GameScene');
       if (gameScene && gameScene.launchPuzzle) {
         gameScene.launchPuzzle(
@@ -162,14 +110,13 @@ export default class StoryScene extends Phaser.Scene {
   }
 
   /**
-   * Handle intersection choice selection
+   * Handle intersection choice selection.
    * @param {Object} choice - The chosen option
    */
   handleChoice(choice) {
     this.scene.stop();
     this.scene.resume('GameScene');
 
-    // Pass choice back to GameScene for effect processing
     const gameScene = this.scene.get('GameScene');
     if (gameScene && gameScene.applyIntersectionChoice) {
       gameScene.applyIntersectionChoice(this.choiceData.intersectionId, choice);

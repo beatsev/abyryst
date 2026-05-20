@@ -10,13 +10,18 @@ import GameOverScene from './scenes/GameOverScene.js';
 
 const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: window.innerWidth,
+  height: window.innerHeight,
   parent: 'game-container',
-  backgroundColor: '#1a1a2e',
+  backgroundColor: '#070a12',
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH
+  },
+  render: {
+    antialias: true,
+    pixelArt: false,
+    roundPixels: true
   },
   dom: {
     createContainer: true

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 /**
  * UI Overlay Scene
- * Displays score, timer, and hints as persistent HUD
+ * Displays campaign status and top-level controls as persistent HUD.
  */
 export default class UIOverlay extends Phaser.Scene {
   constructor() {
@@ -10,7 +10,7 @@ export default class UIOverlay extends Phaser.Scene {
   }
 
   /**
-   * Initialize with game state and sound manager references
+   * Initialize with game state and sound manager references.
    * @param {Object} data - Init data containing gameState and soundManager
    */
   init(data) {
@@ -20,63 +20,44 @@ export default class UIOverlay extends Phaser.Scene {
 
   create() {
     const { width } = this.cameras.main;
+    const compact = width < 460;
+    const barHeight = compact ? 82 : 72;
 
-    // Top bar background
-    this.add.rectangle(0, 0, width, 50, 0x16213e)
+    this.add.rectangle(0, 0, width, barHeight, 0x070a12, 0.86)
       .setOrigin(0, 0)
-      .setAlpha(0.9)
       .setDepth(1000)
       .setScrollFactor(0);
+    this.add.rectangle(0, barHeight - 1, width, 1, 0x62e5bf, 0.28)
+      .setOrigin(0, 0)
+      .setDepth(1001)
+      .setScrollFactor(0);
 
-    // Score text (left side)
-    this.scoreText = this.add.text(10, 15, 'Score: 0', {
-      fontSize: '16px',
+    this.menuButton = this.createPill(14, 14, 'MENU', '#e9fff8', '#17233a')
+      .setInteractive({ useHandCursor: true });
+    this.menuButton.on('pointerdown', () => this.returnToMenu());
+
+    this.add.text(width / 2, 14, 'ABYRYST', {
+      fontSize: compact ? '18px' : '22px',
       color: '#ffffff',
-      fontFamily: 'Arial'
-    }).setDepth(1001).setScrollFactor(0);
-
-    // Timer text (center)
-    this.timerText = this.add.text(width / 2, 15, '00:00', {
-      fontSize: '16px',
-      color: '#4ecca3',
-      fontFamily: 'Arial',
-      fontStyle: 'bold'
+      fontFamily: 'Arial Black',
+      stroke: '#62e5bf',
+      strokeThickness: 1
     }).setOrigin(0.5, 0).setDepth(1001).setScrollFactor(0);
 
-    // Hints indicator (right side)
-    this.hintsText = this.add.text(width - 50, 15, '💡×3', {
-      fontSize: '16px',
-      color: '#ffcc00'
-    }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0);
+    this.timerText = this.add.text(width / 2, compact ? 42 : 44, '00:00', {
+      fontSize: compact ? '16px' : '17px',
+      color: '#62e5bf',
+      fontFamily: 'Arial Black'
+    }).setOrigin(0.5, 0).setDepth(1001).setScrollFactor(0);
 
-    // Level indicator (left side, below score)
-    this.levelText = this.add.text(10, 35, 'Level: 1/10', {
-      fontSize: '14px',
-      color: '#ffcc00',
-      fontFamily: 'Arial',
-      fontStyle: 'bold'
-    }).setDepth(1001).setScrollFactor(0);
-
-    // Lives indicator (right side, below hints)
-    this.livesText = this.add.text(width - 50, 35, '❤️×3', {
-      fontSize: '14px',
-      color: '#ff6b6b'
-    }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0);
-
-    // Sound toggle button (far right)
-    this.soundButton = this.add.text(width - 10, 15, '🔊', {
-      fontSize: '18px',
-      color: '#ffffff'
+    this.soundButton = this.add.text(width - 16, 14, 'SOUND', {
+      fontSize: compact ? '12px' : '13px',
+      color: '#f5fffb',
+      fontFamily: 'Arial Black',
+      backgroundColor: '#17233a',
+      padding: { x: 10, y: 9 }
     }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0)
       .setInteractive({ useHandCursor: true });
-
-    this.soundButton.on('pointerover', () => {
-      this.soundButton.setScale(1.1);
-    });
-
-    this.soundButton.on('pointerout', () => {
-      this.soundButton.setScale(1.0);
-    });
 
     this.soundButton.on('pointerdown', () => {
       if (this.soundManager) {
@@ -85,7 +66,16 @@ export default class UIOverlay extends Phaser.Scene {
       }
     });
 
-    // Update UI every second
+    const statY = compact ? 58 : 46;
+    this.levelText = this.add.text(14, statY, 'L 1/10', this.statStyle('#ffcf5a'))
+      .setDepth(1001).setScrollFactor(0);
+    this.scoreText = this.add.text(width * 0.26, statY, '0', this.statStyle('#ffffff'))
+      .setDepth(1001).setScrollFactor(0);
+    this.hintsText = this.add.text(width * 0.74, statY, 'H 3', this.statStyle('#ffcf5a'))
+      .setOrigin(1, 0).setDepth(1001).setScrollFactor(0);
+    this.livesText = this.add.text(width - 14, statY, 'HP 3', this.statStyle('#ff7588'))
+      .setOrigin(1, 0).setDepth(1001).setScrollFactor(0);
+
     this.time.addEvent({
       delay: 1000,
       callback: this.updateUI,
@@ -93,34 +83,52 @@ export default class UIOverlay extends Phaser.Scene {
       loop: true
     });
 
-    // Initial update
     this.updateUI();
     this.updateSoundButton();
   }
 
-  /**
-   * Update UI text with current game state
-   */
+  createPill(x, y, text, color, backgroundColor) {
+    return this.add.text(x, y, text, {
+      fontSize: '13px',
+      color,
+      fontFamily: 'Arial Black',
+      backgroundColor,
+      padding: { x: 12, y: 9 }
+    }).setDepth(1001).setScrollFactor(0);
+  }
+
+  statStyle(color) {
+    return {
+      fontSize: '13px',
+      color,
+      fontFamily: 'Arial Black'
+    };
+  }
+
   updateUI() {
     if (!this.gameState) return;
 
-    this.scoreText.setText(`Score: ${this.gameState.score}`);
+    this.scoreText.setText(`S ${this.gameState.score}`);
     this.timerText.setText(this.gameState.formatLevelTime());
-    this.hintsText.setText(`💡×${this.gameState.hintsRemaining}`);
+    this.hintsText.setText(`H ${this.gameState.hintsRemaining}`);
 
     if (this.gameState.isCampaignMode) {
-      this.levelText.setText(`Level: ${this.gameState.currentLevel}/10`);
-      this.livesText.setText(`❤️×${this.gameState.livesRemaining}`);
+      this.levelText.setText(`L ${this.gameState.currentLevel}/10`);
+      this.livesText.setText(`HP ${this.gameState.livesRemaining}`);
     }
   }
 
-  /**
-   * Update sound button icon based on enabled state
-   */
   updateSoundButton() {
     if (!this.soundManager || !this.soundButton) return;
 
     const isEnabled = this.soundManager.isEnabled();
-    this.soundButton.setText(isEnabled ? '🔊' : '🔇');
+    this.soundButton.setText(isEnabled ? 'SOUND' : 'MUTED');
+    this.soundButton.setStyle({ backgroundColor: isEnabled ? '#17233a' : '#3a1724' });
+  }
+
+  returnToMenu() {
+    this.scene.stop('GameScene');
+    this.scene.stop();
+    this.scene.start('MenuScene');
   }
 }

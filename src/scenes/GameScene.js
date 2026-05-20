@@ -64,6 +64,8 @@ export default class GameScene extends Phaser.Scene {
       soundManager: this.soundManager
     });
 
+    this.createSceneBackdrop();
+
     // Generate labyrinth with level-specific grid size
     const { width: gridW, height: gridH } = this.currentLevelConfig.gridSize;
     this.labyrinth = LabyrinthGenerator.generate(gridW, gridH);
@@ -84,29 +86,9 @@ export default class GameScene extends Phaser.Scene {
     this.renderLabyrinth();
 
     // Render player
-    this.player = this.add.image(0, 0, 'player-sprite');
-    this.player.setTint(0xff6b6b);
+    this.playerGlow = this.add.circle(0, 0, Math.max(14, this.tileSize * 0.28), 0xff647a, 0.22).setDepth(20);
+    this.player = this.add.image(0, 0, 'player-sprite').setDepth(21);
     this.updatePlayerPosition();
-
-    // UI - Menu button (top-left)
-    const menuButton = this.add.text(10, 10, '☰ Menu', {
-      fontSize: '20px',
-      fontFamily: 'Arial',
-      color: '#ffffff',
-      backgroundColor: '#16213e',
-      padding: { x: 10, y: 5 }
-    }).setInteractive({ useHandCursor: true });
-
-    menuButton.on('pointerdown', () => {
-      this.scene.start('MenuScene');
-    });
-
-    // Title (top-right)
-    this.add.text(width - 10, 10, 'ABYRYST', {
-      fontSize: '20px',
-      fontFamily: 'Arial Black',
-      color: '#ffffff'
-    }).setOrigin(1, 0);
 
     // Setup touch controls
     this.setupTouchControls();
@@ -134,36 +116,57 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
+
+  createSceneBackdrop() {
+    const { width, height } = this.cameras.main;
+    this.add.rectangle(0, 0, width, height, 0x070a12).setOrigin(0);
+
+    const glow = this.add.graphics();
+    glow.fillGradientStyle(0x16304a, 0x16304a, 0x070a12, 0x070a12, 0.75);
+    glow.fillRect(0, 0, width, Math.max(180, height * 0.34));
+    glow.fillStyle(0x62e5bf, 0.055);
+    glow.fillCircle(width * 0.18, height * 0.18, Math.max(90, width * 0.24));
+    glow.fillStyle(0xffc857, 0.04);
+    glow.fillCircle(width * 0.86, height * 0.12, Math.max(80, width * 0.2));
+  }
+
+  createMoveButton(x, y, size, label) {
+    const button = this.add.container(x, y).setSize(size, size).setDepth(41);
+    const bg = this.add.circle(0, 0, size / 2, 0x17233a, 0.9)
+      .setStrokeStyle(2, 0x62e5bf, 0.55);
+    const text = this.add.text(0, 0, label, {
+      fontSize: `${Math.floor(size * 0.44)}px`,
+      fontFamily: 'Arial Black',
+      color: '#f5fffb'
+    }).setOrigin(0.5);
+
+    button.add([bg, text]);
+    button.setInteractive(new Phaser.Geom.Circle(0, 0, size / 2), Phaser.Geom.Circle.Contains);
+    button.on('pointerover', () => bg.setFillStyle(0x254467, 0.96));
+    button.on('pointerout', () => bg.setFillStyle(0x17233a, 0.9));
+    button.on('pointerdown', () => {
+      bg.setFillStyle(0x62e5bf, 0.75);
+      this.time.delayedCall(90, () => bg.setFillStyle(0x17233a, 0.9));
+    });
+
+    return button;
+  }
+
   setupTouchControls() {
     const { width, height } = this.cameras.main;
-    const buttonSize = 60;
-    const buttonMargin = 20;
-    const bottomY = height - buttonSize - buttonMargin;
-
-    // D-pad style buttons (bottom center)
+    const buttonSize = Math.max(58, Math.min(76, width * 0.16));
+    const gap = Math.max(10, Math.min(16, width * 0.025));
+    const bottomY = height - buttonSize - Math.max(18, height * 0.025);
     const centerX = width / 2;
-    const buttonStyle = {
-      fontSize: '32px',
-      color: '#ffffff',
-      backgroundColor: '#16213e',
-      padding: { x: 15, y: 5 }
-    };
 
-    // Up button
-    const upBtn = this.add.text(centerX, bottomY - buttonSize - 10, '▲', buttonStyle)
-      .setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.add.rectangle(centerX, bottomY, buttonSize * 3 + gap * 2 + 28, buttonSize * 2 + gap + 24, 0x070a12, 0.58)
+      .setStrokeStyle(1, 0x62e5bf, 0.22)
+      .setDepth(40);
 
-    // Down button
-    const downBtn = this.add.text(centerX, bottomY + buttonSize + 10, '▼', buttonStyle)
-      .setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-    // Left button
-    const leftBtn = this.add.text(centerX - buttonSize - 10, bottomY, '◄', buttonStyle)
-      .setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-    // Right button
-    const rightBtn = this.add.text(centerX + buttonSize + 10, bottomY, '►', buttonStyle)
-      .setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const upBtn = this.createMoveButton(centerX, bottomY - buttonSize / 2 - gap / 2, buttonSize, '▲');
+    const downBtn = this.createMoveButton(centerX, bottomY + buttonSize / 2 + gap / 2, buttonSize, '▼');
+    const leftBtn = this.createMoveButton(centerX - buttonSize - gap, bottomY + buttonSize / 2 + gap / 2, buttonSize, '◄');
+    const rightBtn = this.createMoveButton(centerX + buttonSize + gap, bottomY + buttonSize / 2 + gap / 2, buttonSize, '►');
 
     // Button events
     upBtn.on('pointerdown', () => this.tryMove(0, -1));
@@ -212,6 +215,8 @@ export default class GameScene extends Phaser.Scene {
 
       // Track visited tile
       this.gameState.markTileVisited(newPos.x, newPos.y);
+      this.renderLabyrinth();
+      this.updatePlayerPosition();
 
       // Handle special tile events (puzzles, intersections)
       this.handleTileEntry(newPos);
@@ -251,7 +256,13 @@ export default class GameScene extends Phaser.Scene {
     const gridWidth = this.labyrinth.width * this.tileSize;
     const gridHeight = this.labyrinth.height * this.tileSize;
     const offsetX = (width - gridWidth) / 2;
-    const offsetY = (height - gridHeight) / 2;
+    const offsetY = Math.max(86, (height - gridHeight) / 2 - 18);
+
+    const boardPad = Math.max(8, this.tileSize * 0.12);
+    const boardShadow = this.add.rectangle(width / 2 + 4, offsetY + gridHeight / 2 + 6, gridWidth + boardPad * 2, gridHeight + boardPad * 2, 0x000000, 0.32);
+    const boardBg = this.add.rectangle(width / 2, offsetY + gridHeight / 2, gridWidth + boardPad * 2, gridHeight + boardPad * 2, 0x0b1020, 0.92)
+      .setStrokeStyle(2, 0x62e5bf, 0.22);
+    this.labyrinthContainer.add([boardShadow, boardBg]);
 
     this.labyrinth.grid.forEach((row, y) => {
       row.forEach((tile, x) => {
@@ -277,6 +288,18 @@ export default class GameScene extends Phaser.Scene {
         );
         sprite.setDisplaySize(this.tileSize, this.tileSize);
         this.labyrinthContainer.add(sprite);
+
+        if (tile.type !== 'empty' && !this.gameState.visitedTiles.includes(`${x},${y}`)) {
+          const veil = this.add.rectangle(
+            posX + this.tileSize / 2,
+            posY + this.tileSize / 2,
+            this.tileSize * 0.96,
+            this.tileSize * 0.96,
+            0x05070d,
+            0.22
+          );
+          this.labyrinthContainer.add(veil);
+        }
 
         if (tile.type !== 'empty') {
           // Mark start/end
@@ -327,12 +350,15 @@ export default class GameScene extends Phaser.Scene {
     const gridWidth = this.labyrinth.width * this.tileSize;
     const gridHeight = this.labyrinth.height * this.tileSize;
     const offsetX = (width - gridWidth) / 2;
-    const offsetY = (height - gridHeight) / 2;
+    const offsetY = Math.max(86, (height - gridHeight) / 2 - 18);
+    const x = offsetX + this.playerPos.x * this.tileSize + this.tileSize / 2;
+    const y = offsetY + this.playerPos.y * this.tileSize + this.tileSize / 2;
 
-    this.player.setPosition(
-      offsetX + this.playerPos.x * this.tileSize + this.tileSize / 2,
-      offsetY + this.playerPos.y * this.tileSize + this.tileSize / 2
-    );
+    if (this.playerGlow) {
+      this.playerGlow.setPosition(x, y).setRadius(Math.max(14, this.tileSize * 0.31));
+    }
+    this.player.setPosition(x, y);
+    this.player.setDisplaySize(this.tileSize * 0.68, this.tileSize * 0.68);
   }
 
   isValidMove(pos) {
@@ -560,6 +586,9 @@ export default class GameScene extends Phaser.Scene {
     if (this.player) {
       this.player.destroy();
     }
+    if (this.playerGlow) {
+      this.playerGlow.destroy();
+    }
 
     // Generate new labyrinth with current level's grid size
     const { width: gridW, height: gridH } = this.currentLevelConfig.gridSize;
@@ -577,8 +606,8 @@ export default class GameScene extends Phaser.Scene {
     this.renderLabyrinth();
 
     // Re-render player
-    this.player = this.add.image(0, 0, 'player-sprite');
-    this.player.setTint(0xff6b6b);
+    this.playerGlow = this.add.circle(0, 0, Math.max(14, this.tileSize * 0.28), 0xff647a, 0.22).setDepth(20);
+    this.player = this.add.image(0, 0, 'player-sprite').setDepth(21);
     this.updatePlayerPosition();
   }
 
@@ -604,10 +633,13 @@ export default class GameScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
     const { width: gridW, height: gridH } = this.currentLevelConfig.gridSize;
 
-    const maxTileSizeX = (width - 100) / gridW;
-    const maxTileSizeY = (height - 200) / gridH;
+    const sidePadding = Math.max(24, Math.min(72, width * 0.08));
+    const topReserve = 92;
+    const bottomReserve = Math.max(176, Math.min(230, height * 0.28));
+    const maxTileSizeX = (width - sidePadding * 2) / gridW;
+    const maxTileSizeY = (height - topReserve - bottomReserve) / gridH;
 
-    this.tileSize = Math.min(100, maxTileSizeX, maxTileSizeY);
+    this.tileSize = Math.floor(Math.max(34, Math.min(96, maxTileSizeX, maxTileSizeY)));
   }
 
   /**
