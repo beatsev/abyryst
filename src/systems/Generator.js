@@ -77,13 +77,19 @@ export default class LabyrinthGenerator {
   static postProcessTiles(grid, width, height, start, end) {
     // Collect all path tiles (excluding start and end)
     const pathTiles = [];
+    const intersectionCandidates = [];
 
     grid.forEach((row, y) => {
       row.forEach((tile, x) => {
         if (tile.type === 'path' &&
             !(x === start.x && y === start.y) &&
             !(x === end.x && y === end.y)) {
-          pathTiles.push({ x, y, tile });
+          const pos = { x, y, tile };
+          pathTiles.push(pos);
+
+          if (this.isChoiceTile(tile)) {
+            intersectionCandidates.push(pos);
+          }
         }
       });
     });
@@ -99,11 +105,17 @@ export default class LabyrinthGenerator {
       grid[pos.y][pos.x].puzzleId = this.randomPuzzleId();
     }
 
-    // Assign 2 intersection tiles from remaining tiles
-    const remaining = shuffled.slice(puzzleCount);
-    const intersectionCount = Math.min(2, remaining.length);
+    // Assign 2 intersection tiles from real maze junctions only.
+    // Degree-1 dead ends and degree-2 corridors do not present a path choice.
+    const puzzleKeys = new Set(
+      shuffled.slice(0, puzzleCount).map(pos => this.positionKey(pos))
+    );
+    const availableIntersections = this.shuffleArray(
+      intersectionCandidates.filter(pos => !puzzleKeys.has(this.positionKey(pos)))
+    );
+    const intersectionCount = Math.min(2, availableIntersections.length);
     for (let i = 0; i < intersectionCount; i++) {
-      const pos = remaining[i];
+      const pos = availableIntersections[i];
       grid[pos.y][pos.x].type = 'intersection';
       grid[pos.y][pos.x].storyBranch = Math.random() > 0.5 ? 'A' : 'B';
     }
@@ -180,10 +192,14 @@ export default class LabyrinthGenerator {
       return;
     }
 
-    // Check if any tile on critical path is already a puzzle
-    const hasPuzzleOnPath = criticalPath.some(pos =>
-      grid[pos.y][pos.x].type === 'puzzle'
-    );
+    // Check if any non-endpoint tile on critical path is already a puzzle
+    const hasPuzzleOnPath = criticalPath.some(pos => {
+      const isEndpoint =
+        (pos.x === start.x && pos.y === start.y) ||
+        (pos.x === end.x && pos.y === end.y);
+
+      return !isEndpoint && grid[pos.y][pos.x].type === 'puzzle';
+    });
 
     if (hasPuzzleOnPath) {
       // Already have at least one puzzle on critical path
@@ -210,6 +226,33 @@ export default class LabyrinthGenerator {
     // Convert to puzzle
     grid[chosenTile.y][chosenTile.x].type = 'puzzle';
     grid[chosenTile.y][chosenTile.x].puzzleId = this.randomPuzzleId();
+  }
+
+  /**
+   * Get a stable key for a grid position
+   * @param {Object} pos - Tile position
+   * @returns {string} Position key
+   */
+  static positionKey(pos) {
+    return `${pos.x},${pos.y}`;
+  }
+
+  /**
+   * Count open paths from a tile
+   * @param {Object} tile - Grid tile
+   * @returns {number} Number of connected directions
+   */
+  static getConnectionCount(tile) {
+    return Object.values(tile.connections).filter(Boolean).length;
+  }
+
+  /**
+   * Whether a tile is a real decision point in the maze
+   * @param {Object} tile - Grid tile
+   * @returns {boolean} True if the tile branches into at least three paths
+   */
+  static isChoiceTile(tile) {
+    return this.getConnectionCount(tile) >= 3;
   }
 
   /**
