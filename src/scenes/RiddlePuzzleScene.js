@@ -36,6 +36,7 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       this.returnToGame();
       return;
     }
+    this.puzzle = puzzle;
 
     // Puzzle card background - use almost full screen height on mobile
     const cardWidth = Math.min(700, width - 28);
@@ -215,13 +216,17 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
    * Show next hint
    */
   showHint() {
-    if (this.currentHintIndex >= 3) {
-      this.hintText.setText('No more hints available!');
+    const hintCount = this.puzzle?.hints?.length || 0;
+
+    if (this.currentHintIndex >= hintCount) {
+      this.feedbackText.setText('No more hints available!').setColor('#ffcf5a');
+      this.disableHintButton();
       return;
     }
 
     if (this.gameState.hintsRemaining <= 0) {
-      this.hintText.setText('No hints remaining! (Used all 3)');
+      this.feedbackText.setText('No hints remaining.').setColor('#ffcf5a');
+      this.disableHintButton();
       return;
     }
 
@@ -237,10 +242,26 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       // Display all hints shown so far
       const hintDisplay = this.hintsShown.map((h, i) => `Hint ${i + 1}: ${h}`).join('\n');
       this.hintText.setText(hintDisplay);
+      this.feedbackText.setText('');
 
       // Update hint button counter
       this.hintButton.setText(`Hint (${this.gameState.hintsRemaining})`);
+
+      if (this.gameState.hintsRemaining <= 0 || this.currentHintIndex >= hintCount) {
+        this.disableHintButton();
+      }
     }
+  }
+
+  /**
+   * Disable the hint button after the player has no usable hints left.
+   */
+  disableHintButton() {
+    if (!this.hintButton) return;
+
+    this.hintButton
+      .setAlpha(0.5)
+      .disableInteractive();
   }
 
   /**

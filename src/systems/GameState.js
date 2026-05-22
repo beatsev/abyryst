@@ -79,6 +79,7 @@ export default class GameState {
   useHint() {
     if (this.hintsRemaining > 0) {
       this.hintsRemaining--;
+      this.levelStats.hintsUsed++;
       return true;
     }
     return false;
