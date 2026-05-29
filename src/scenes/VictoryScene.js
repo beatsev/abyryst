@@ -1,3 +1,5 @@
+import { wireButton } from '../systems/ButtonUtils.js';
+
 /**
  * Victory Scene
  * Displays final campaign stats after beating all 10 levels
@@ -109,12 +111,10 @@ export default class VictoryScene extends Phaser.Scene {
     const menuBtn = this.add.text(width / 2, height - 80, 'Return to Menu', {
       fontSize: '28px',
       backgroundColor: '#16213e',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 28, y: 14 }
+    }).setOrigin(0.5);
 
-    menuBtn.on('pointerdown', () => this.returnToMenu());
-    menuBtn.on('pointerover', () => menuBtn.setScale(1.1));
-    menuBtn.on('pointerout', () => menuBtn.setScale(1.0));
+    wireButton(this, menuBtn, () => this.returnToMenu(), { pressScale: 1.04 });
 
     // Clear campaign save (campaign is complete)
     localStorage.removeItem('abyryst_campaign_save');

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { wireButton } from '../systems/ButtonUtils.js';
 
 /**
  * RiddlePuzzleScene
@@ -120,47 +121,47 @@ export default class RiddlePuzzleScene extends Phaser.Scene {
       fontSize: '18px',
       backgroundColor: '#ffcf5a',
       color: '#000000',
-      padding: { x: 20, y: 8 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 24, y: 12 }
+    }).setOrigin(0.5);
 
+    wireButton(this, this.hintButton, () => this.showHint());
     this.hintButton.on('pointerover', () => {
       this.hintButton.setBackgroundColor('#ffe083');
     });
     this.hintButton.on('pointerout', () => {
       this.hintButton.setBackgroundColor('#ffcf5a');
     });
-    this.hintButton.on('pointerdown', () => this.showHint());
 
     // Submit button
     this.submitButton = this.add.text(width / 2 + buttonOffset, actionButtonY, 'Submit', {
       fontSize: '18px',
       backgroundColor: '#62e5bf',
       color: '#000000',
-      padding: { x: 30, y: 8 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 34, y: 12 }
+    }).setOrigin(0.5);
 
+    wireButton(this, this.submitButton, () => this.checkAnswer());
     this.submitButton.on('pointerover', () => {
       this.submitButton.setBackgroundColor('#85f0d2');
     });
     this.submitButton.on('pointerout', () => {
       this.submitButton.setBackgroundColor('#62e5bf');
     });
-    this.submitButton.on('pointerdown', () => this.checkAnswer());
 
     // Close button (in case user wants to skip)
     this.closeButton = this.add.text(width / 2, closeButtonY, 'Close (Skip)', {
       fontSize: '14px',
       color: '#999999',
-      padding: { x: 15, y: 5 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 20, y: 10 }
+    }).setOrigin(0.5);
 
+    wireButton(this, this.closeButton, () => this.returnToGame());
     this.closeButton.on('pointerover', () => {
       this.closeButton.setColor('#ffffff');
     });
     this.closeButton.on('pointerout', () => {
       this.closeButton.setColor('#999999');
     });
-    this.closeButton.on('pointerdown', () => this.returnToGame());
 
     // Keyboard support: Enter to submit
     this.input.keyboard.on('keydown-ENTER', () => this.checkAnswer());

@@ -7,6 +7,7 @@ import PuzzleManager from '../systems/PuzzleManager.js';
 import SoundManager from '../systems/SoundManager.js';
 import IntersectionManager from '../systems/IntersectionManager.js';
 import CampaignManager from '../systems/CampaignManager.js';
+import { circleHitArea, wireButton } from '../systems/ButtonUtils.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -103,6 +104,7 @@ export default class GameScene extends Phaser.Scene {
     this.swipeStartX = 0;
     this.swipeStartY = 0;
     this.swipeMinDistance = 50;
+    this.swipeActive = false;
 
     // Show intro story
     const introStory = this.storyManager.getNextStory('start');
@@ -130,7 +132,7 @@ export default class GameScene extends Phaser.Scene {
     glow.fillCircle(width * 0.86, height * 0.12, Math.max(80, width * 0.2));
   }
 
-  createMoveButton(x, y, size, label) {
+  createMoveButton(x, y, size, label, onClick) {
     const button = this.add.container(x, y).setSize(size, size).setDepth(41);
     const bg = this.add.circle(0, 0, size / 2, 0x17233a, 0.9)
       .setStrokeStyle(2, 0x62e5bf, 0.55);
@@ -141,7 +143,16 @@ export default class GameScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     button.add([bg, text]);
-    button.setInteractive(new Phaser.Geom.Circle(0, 0, size / 2), Phaser.Geom.Circle.Contains);
+
+    const hitArea = circleHitArea(size / 2, Math.max(8, size * 0.12));
+    wireButton(this, button, onClick, {
+      bg,
+      hitArea: hitArea.area,
+      hitAreaCallback: hitArea.callback,
+      hoverAlpha: 1,
+      activateOn: 'down'
+    });
+
     button.on('pointerover', () => bg.setFillStyle(0x254467, 0.96));
     button.on('pointerout', () => bg.setFillStyle(0x17233a, 0.9));
     button.on('pointerdown', () => {
@@ -163,24 +174,27 @@ export default class GameScene extends Phaser.Scene {
       .setStrokeStyle(1, 0x62e5bf, 0.22)
       .setDepth(40);
 
-    const upBtn = this.createMoveButton(centerX, bottomY - buttonSize / 2 - gap / 2, buttonSize, '▲');
-    const downBtn = this.createMoveButton(centerX, bottomY + buttonSize / 2 + gap / 2, buttonSize, '▼');
-    const leftBtn = this.createMoveButton(centerX - buttonSize - gap, bottomY + buttonSize / 2 + gap / 2, buttonSize, '◄');
-    const rightBtn = this.createMoveButton(centerX + buttonSize + gap, bottomY + buttonSize / 2 + gap / 2, buttonSize, '►');
-
-    // Button events
-    upBtn.on('pointerdown', () => this.tryMove(0, -1));
-    downBtn.on('pointerdown', () => this.tryMove(0, 1));
-    leftBtn.on('pointerdown', () => this.tryMove(-1, 0));
-    rightBtn.on('pointerdown', () => this.tryMove(1, 0));
+    this.createMoveButton(centerX, bottomY - buttonSize / 2 - gap / 2, buttonSize, '▲', () => this.tryMove(0, -1));
+    this.createMoveButton(centerX, bottomY + buttonSize / 2 + gap / 2, buttonSize, '▼', () => this.tryMove(0, 1));
+    this.createMoveButton(centerX - buttonSize - gap, bottomY + buttonSize / 2 + gap / 2, buttonSize, '◄', () => this.tryMove(-1, 0));
+    this.createMoveButton(centerX + buttonSize + gap, bottomY + buttonSize / 2 + gap / 2, buttonSize, '►', () => this.tryMove(1, 0));
 
     // Swipe detection
-    this.input.on('pointerdown', (pointer) => {
+    this.input.on('pointerdown', (pointer, currentlyOver = []) => {
+      if (currentlyOver.some(target => target.isUiButton)) {
+        this.swipeActive = false;
+        return;
+      }
+
       this.swipeStartX = pointer.x;
       this.swipeStartY = pointer.y;
+      this.swipeActive = true;
     });
 
     this.input.on('pointerup', (pointer) => {
+      if (!this.swipeActive) return;
+      this.swipeActive = false;
+
       const deltaX = pointer.x - this.swipeStartX;
       const deltaY = pointer.y - this.swipeStartY;
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -225,7 +239,7 @@ export default class GameScene extends Phaser.Scene {
 
       // Movement cooldown
       this.canMove = false;
-      this.time.delayedCall(200, () => { this.canMove = true; });
+      this.time.delayedCall(130, () => { this.canMove = true; });
     }
   }
 

@@ -1,3 +1,5 @@
+import { wireButton } from '../systems/ButtonUtils.js';
+
 /**
  * Game Over Scene
  * Displays when player runs out of lives (0 lives remaining)
@@ -88,23 +90,19 @@ export default class GameOverScene extends Phaser.Scene {
     const tryAgainBtn = this.add.text(width / 2, btnY, 'Try Again', {
       fontSize: '26px',
       backgroundColor: '#4ecca3',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 28, y: 14 }
+    }).setOrigin(0.5);
 
-    tryAgainBtn.on('pointerdown', () => this.tryAgain());
-    tryAgainBtn.on('pointerover', () => tryAgainBtn.setScale(1.1));
-    tryAgainBtn.on('pointerout', () => tryAgainBtn.setScale(1.0));
+    wireButton(this, tryAgainBtn, () => this.tryAgain(), { pressScale: 1.04 });
 
     // Menu button
     const menuBtn = this.add.text(width / 2, btnY + 50, 'Return to Menu', {
       fontSize: '20px',
       backgroundColor: '#16213e',
-      padding: { x: 15, y: 8 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 22, y: 12 }
+    }).setOrigin(0.5);
 
-    menuBtn.on('pointerdown', () => this.returnToMenu());
-    menuBtn.on('pointerover', () => menuBtn.setScale(1.1));
-    menuBtn.on('pointerout', () => menuBtn.setScale(1.0));
+    wireButton(this, menuBtn, () => this.returnToMenu(), { pressScale: 1.04 });
 
     // Clear campaign save (campaign failed)
     localStorage.removeItem('abyryst_campaign_save');

@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { wireButton } from '../systems/ButtonUtils.js';
+
 /**
  * UI Overlay Scene
  * Displays campaign status and top-level controls as persistent HUD.
@@ -32,9 +34,8 @@ export default class UIOverlay extends Phaser.Scene {
       .setDepth(1001)
       .setScrollFactor(0);
 
-    this.menuButton = this.createPill(14, 14, 'MENU', '#e9fff8', '#17233a')
-      .setInteractive({ useHandCursor: true });
-    this.menuButton.on('pointerdown', () => this.returnToMenu());
+    this.menuButton = this.createPill(14, 14, 'MENU', '#e9fff8', '#17233a');
+    wireButton(this, this.menuButton, () => this.returnToMenu());
 
     this.add.text(width / 2, 14, 'ABYRYST', {
       fontSize: compact ? '18px' : '22px',
@@ -55,11 +56,10 @@ export default class UIOverlay extends Phaser.Scene {
       color: '#f5fffb',
       fontFamily: 'Arial Black',
       backgroundColor: '#17233a',
-      padding: { x: 10, y: 9 }
-    }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0)
-      .setInteractive({ useHandCursor: true });
+      padding: { x: 14, y: 11 }
+    }).setOrigin(1, 0).setDepth(1001).setScrollFactor(0);
 
-    this.soundButton.on('pointerdown', () => {
+    wireButton(this, this.soundButton, () => {
       if (this.soundManager) {
         this.soundManager.toggle();
         this.updateSoundButton();
@@ -93,7 +93,7 @@ export default class UIOverlay extends Phaser.Scene {
       color,
       fontFamily: 'Arial Black',
       backgroundColor,
-      padding: { x: 12, y: 9 }
+      padding: { x: 16, y: 11 }
     }).setDepth(1001).setScrollFactor(0);
   }
 

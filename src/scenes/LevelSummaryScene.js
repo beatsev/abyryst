@@ -1,3 +1,5 @@
+import { wireButton } from '../systems/ButtonUtils.js';
+
 /**
  * Level Summary Scene
  * Displays level completion stats, grade, and Continue/Quit options
@@ -109,23 +111,19 @@ export default class LevelSummaryScene extends Phaser.Scene {
     const continueBtn = this.add.text(width / 2 - 80, btnY, 'Continue', {
       fontSize: '24px',
       backgroundColor: '#4ecca3',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 26, y: 14 }
+    }).setOrigin(0.5);
 
-    continueBtn.on('pointerdown', () => this.onContinue());
-    continueBtn.on('pointerover', () => continueBtn.setScale(1.1));
-    continueBtn.on('pointerout', () => continueBtn.setScale(1.0));
+    wireButton(this, continueBtn, () => this.onContinue(), { pressScale: 1.04 });
 
     // Quit button
     const quitBtn = this.add.text(width / 2 + 80, btnY, 'Quit', {
       fontSize: '24px',
       backgroundColor: '#e94560',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 28, y: 14 }
+    }).setOrigin(0.5);
 
-    quitBtn.on('pointerdown', () => this.onQuit());
-    quitBtn.on('pointerover', () => quitBtn.setScale(1.1));
-    quitBtn.on('pointerout', () => quitBtn.setScale(1.0));
+    wireButton(this, quitBtn, () => this.onQuit(), { pressScale: 1.04 });
   }
 
   /**

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { rectangleHitArea, wireButton } from '../systems/ButtonUtils.js';
 
 export default class MenuScene extends Phaser.Scene {
   constructor() {
@@ -131,10 +132,12 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     button.add([bg, text]);
-    button.setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains);
-    button.on('pointerover', () => bg.setAlpha(0.86));
-    button.on('pointerout', () => bg.setAlpha(1));
-    button.on('pointerdown', onClick);
+    const hitArea = rectangleHitArea(width, height, 8);
+    wireButton(this, button, onClick, {
+      bg,
+      hitArea: hitArea.area,
+      hitAreaCallback: hitArea.callback
+    });
     return button;
   }
 
